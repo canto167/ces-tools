@@ -1,0 +1,13 @@
+{
+  "name": "ces-tools",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Suite of free structural engineering web calculators for Civil Engineer Society",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "build": "node build.js"
+  },
+  "keywords": ["structural-engineering", "eurocode-2", "bs-8110", "calculators"],
+  "author": "Civil Engineer Society",
+  "license": "MIT"
+}

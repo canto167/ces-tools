@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Rectangular Beam Designer (EC2 & BS 8110) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header for PDF / Print Output -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Structural Verification Calculation</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-BM-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> Rectangular RC Beam Section</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Code:</strong> <span id="lbl_code_tag">Eurocode 2 (EN 1992-1-1)</span></td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <!-- Screen Header -->
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">RC Rectangular Beam Designer</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Singly/Doubly Reinforced Flexure, Shear & Deflection</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <!-- Error Alert Banner -->
+    <div id="errorAlert" class="card" style="display: none; background: var(--color-red-light); border-color: var(--color-red); color: var(--color-red);"></div>
+
+    <!-- Main Grid -->
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <!-- Code Selection -->
+        <div class="card">
+          <div class="card-title">Design Code & Standard</div>
+          <div style="display: flex; gap: 16px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer;">
+              <input type="radio" name="design_code" value="EC2" checked> Eurocode 2 (EN 1992-1-1)
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer;">
+              <input type="radio" name="design_code" value="BS8110"> BS 8110-1:1997
+            </label>
+          </div>
+        </div>
+
+        <!-- Section Geometry -->
+        <div class="card">
+          <div class="card-title">Section Geometry</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="b">Width, b <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="b" class="form-input" value="300" min="100" max="2000" step="25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="h">Total Depth, h <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="h" class="form-input" value="500" min="150" max="3000" step="25">
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="cover">Nominal Cover, c <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="cover" class="form-input" value="30" min="15" max="100" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="agg">Max Aggregate <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="agg" class="form-input" value="20" min="10" max="40" step="2">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Material Strengths -->
+        <div class="card">
+          <div class="card-title">Material Strengths</div>
+          <div class="form-group">
+            <label class="form-label" for="fck_fcu"><span id="lbl_conc_strength">fck (Cylinder strength)</span> <span class="unit">(N/mm²)</span></label>
+            <div class="input-with-stepper">
+              <input type="number" id="fck_fcu" class="form-input" value="30" min="20" max="50" step="5">
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fyk_fy"><span id="lbl_steel_strength">fyk (Yield strength)</span> <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fyk_fy" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fywk_fyv"><span id="lbl_link_strength">fywk (Link strength)</span> <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fywk_fyv" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Design Actions & Span -->
+        <div class="card">
+          <div class="card-title">Design Actions & Span</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="M">Design Moment, M <span class="unit">(kNm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="M" class="form-input" value="189" min="0" max="5000" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="V">Design Shear, V <span class="unit">(kN)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="V" class="form-input" value="126" min="0" max="5000" step="5">
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="L">Span Length, L <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="L" class="form-input" value="6.0" min="1.0" max="30.0" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="support">Support Condition</label>
+              <select id="support" class="form-input" style="padding: 7px 10px;">
+                <option value="simply_supported" selected>Simply Supported</option>
+                <option value="end_span">Continuous - End Span</option>
+                <option value="interior_span">Continuous - Interior Span</option>
+                <option value="cantilever">Cantilever</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reinforcement Layout -->
+        <div class="card">
+          <div class="card-title">Provided Reinforcement Layout</div>
+          <!-- Tension Steel -->
+          <div class="form-group">
+            <label class="form-label">Tension Bars (Bottom)</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Number:</span>
+              <div class="input-with-stepper" style="width: 120px;">
+                <input type="number" id="bars_n" class="form-input" value="4" min="1" max="12" step="1">
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Diameter:</span>
+              <div id="tension_bar_dia_group" style="flex: 1;"></div>
+            </div>
+          </div>
+
+          <!-- Top Compression Steel -->
+          <div class="form-group" style="padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <label class="form-label">Top / Hanger Bars</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Number:</span>
+              <div class="input-with-stepper" style="width: 120px;">
+                <input type="number" id="top_bars_n" class="form-input" value="2" min="1" max="8" step="1">
+              </div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Diameter:</span>
+              <div id="top_bar_dia_group" style="flex: 1;"></div>
+            </div>
+          </div>
+
+          <!-- Shear Links -->
+          <div class="form-group" style="padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <label class="form-label">Shear Links / Stirrups</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Diameter:</span>
+              <div id="link_dia_group" style="flex: 1;"></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+              <div class="form-group">
+                <label class="form-label" for="link_legs">Legs</label>
+                <div class="input-with-stepper">
+                  <input type="number" id="link_legs" class="form-input" value="2" min="1" max="6" step="1">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="link_spacing">Spacing, s <span class="unit">(mm)</span></label>
+                <div class="input-with-stepper">
+                  <input type="number" id="link_spacing" class="form-input" value="150" min="50" max="500" step="25">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results & Interactive SVG -->
+      <div class="ces-results-panel">
+        <!-- SVG Section Drawing -->
+        <div class="card">
+          <div class="card-title">Scaled Cross-Section</div>
+          <div class="svg-canvas-container">
+            <svg id="beamSectionSVG" width="340" height="340"></svg>
+          </div>
+          <!-- Summary Key Metrics Grid -->
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <!-- Design Checks & Report Tabs -->
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Limit State Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <!-- Tab 1: Checks -->
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <!-- Tab 2: Full Working Steps -->
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Equation</th>
+                    <th>Substitution</th>
+                    <th>Result</th>
+                    <th>Clause</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Related Guides -->
+        <div class="card no-print" style="background: var(--color-blue-light); border-color: var(--color-blue);">
+          <div class="card-title" style="color: var(--color-blue); font-size: 14px;">Related Guides & Worked Examples</div>
+          <ul style="font-size: 13px; padding-left: 20px; line-height: 1.6;">
+            <li><a href="#guide-ec2-beam-flexure" style="color: var(--color-blue); font-weight: 600;">How to Design RC Beams to Eurocode 2: Singly vs Doubly Reinforced</a></li>
+            <li><a href="#guide-bs8110-beam-deflection" style="color: var(--color-blue); font-weight: 600;">Span-to-Depth Ratio Deflection Checks Explained (BS 8110 Table 3.9/3.10)</a></li>
+            <li><a href="#guide-shear-links-ec2" style="color: var(--color-blue); font-weight: 600;">Eurocode 2 Variable Strut Angle Shear Design: Understanding cot θ = 2.5</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — RC Rectangular Beam Designer v1.0.<br>
+      Disclaimer: This sheet is a computer-assisted calculation. Results must be checked and certified by a registered Professional Engineer.
+    </div>
+
+    <!-- Screen Disclaimer -->
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> This free calculation tool is provided for educational and preliminary design verification purposes. The author and Civil Engineer Society accept no liability for decisions made using this application. Designs must be reviewed by a certified Professional Engineer prior to construction.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initRcBeamUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initRcBeamUI();
+    });
+  </script>
+</body>
+</html>

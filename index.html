@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CES Tools — Free Structural Engineering Web Calculators</title>
+  <link rel="stylesheet" href="shared/css/base.css">
+  <style>
+    .hub-hero {
+      text-align: center;
+      padding: 30px 10px 20px;
+    }
+    .hub-hero h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--color-navy);
+      margin-bottom: 8px;
+    }
+    .hub-hero p {
+      font-size: 15px;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      background: var(--bg-card);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+    .search-box {
+      flex: 1;
+      min-width: 240px;
+      padding: 8px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+    }
+    .filter-pills {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pill {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 9999px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-page);
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .pill.active {
+      background: var(--color-blue);
+      color: #fff;
+      border-color: var(--color-blue);
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .tool-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .tool-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--color-blue);
+    }
+    .tool-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .tool-tag {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: var(--color-blue-light);
+      color: var(--color-blue);
+    }
+    .tool-card h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .tool-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+    .tool-card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-color);
+      font-size: 12px;
+    }
+    .code-badge {
+      font-weight: 700;
+      color: var(--color-slate-600);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+  <div class="ces-container">
+    <header class="ces-header">
+      <div class="ces-logo-group">
+        <span class="ces-badge-logo">CES</span>
+        <div>
+          <h1>Civil Engineer Society</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Verified Structural Design Calculators</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="hub-hero">
+      <h1>Structural Engineering Calculators</h1>
+      <p>Precision web tools with live step-by-step design working, SVG diagrams, and printable calculation reports. Grounded in Eurocode 2 and BS 8110.</p>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="searchInput" class="search-box" placeholder="Search calculators (e.g. beam, slab, shear, EC2)...">
+      <div class="filter-pills" id="filterPills">
+        <button class="pill active" data-filter="all">All</button>
+        <button class="pill" data-filter="EC2">Eurocode 2</button>
+        <button class="pill" data-filter="BS8110">BS 8110</button>
+        <button class="pill" data-filter="beam">Beams</button>
+        <button class="pill" data-filter="slab">Slabs</button>
+      </div>
+    </div>
+
+    <div class="tools-grid" id="toolsGrid">
+      <!-- C1 -->
+      <a href="calculators/rc-beam/" class="tool-card" data-tags="EC2 BS8110 beam flexure shear deflection">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Reinforced Concrete</span>
+            <span class="code-badge">EC2 / BS 8110</span>
+          </div>
+          <h2>RC Rectangular Beam</h2>
+          <p>Singly and doubly reinforced beam section flexure, shear link design, and span-to-depth deflection limits with dynamic SVG cross-section.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+          <span style="font-size: 11px; color: var(--color-green); font-weight: 700;">● VERIFIED</span>
+        </div>
+      </a>
+
+      <!-- C2 -->
+      <a href="calculators/one-way-slab/" class="tool-card" data-tags="EC2 BS8110 slab flexure deflection">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Reinforced Concrete</span>
+            <span class="code-badge">EC2 / BS 8110</span>
+          </div>
+          <h2>One-Way Slab Designer</h2>
+          <p>1m strip design for simply supported and continuous slabs with Table 3.12 coefficients, minimum steel, and deflection check.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C3 -->
+      <a href="calculators/two-way-slab/" class="tool-card" data-tags="BS8110 slab two-way flexure">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Slab Systems</span>
+            <span class="code-badge">BS 8110</span>
+          </div>
+          <h2>Two-Way Slab (Simply Supported)</h2>
+          <p>BS 8110 Table 3.13 moment coefficients, short/long span reinforcement, and deflection verification.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C4 -->
+      <a href="calculators/punching-shear/" class="tool-card" data-tags="EC2 slab column punching shear">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Reinforced Concrete</span>
+            <span class="code-badge">EC2 EN 1992-1-1</span>
+          </div>
+          <h2>Punching Shear Designer</h2>
+          <p>Control perimeters u0, u1, u_out, shear capacity vRd,c, and shear reinforcement links/studs.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C5 -->
+      <a href="calculators/pad-footing/" class="tool-card" data-tags="BS8110 foundation footing punching shear">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Foundations</span>
+            <span class="code-badge">BS 8110</span>
+          </div>
+          <h2>Square Pad Footing</h2>
+          <p>Bearing pressure, flexural reinforcement, column face shear, and 1.5d punching shear verification.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C6 -->
+      <a href="calculators/short-column/" class="tool-card" data-tags="BS8110 column axial compression">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Columns</span>
+            <span class="code-badge">BS 8110</span>
+          </div>
+          <h2>Short Braced Column (Axial)</h2>
+          <p>Slenderness check, axial squash capacity, main longitudinal rebar sizing, and link confinement.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C7 -->
+      <a href="calculators/anchorage-lap/" class="tool-card" data-tags="EC2 BS8110 detailing anchorage lap">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Detailing</span>
+            <span class="code-badge">EC2 / BS 8110</span>
+          </div>
+          <h2>Anchorage & Lap Length</h2>
+          <p>Design anchorage length lbd and tension lap length l0 with full alpha coefficients and bond conditions.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C8 -->
+      <a href="calculators/beam-formulas/" class="tool-card" data-tags="analysis beam sfd bmd deflection">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Structural Analysis</span>
+            <span class="code-badge">Formulas & Diagrams</span>
+          </div>
+          <h2>Beam Formulas (SFD & BMD)</h2>
+          <p>Interactive shear force, bending moment and deflection curves for simply supported, cantilever, fixed-fixed, and propped beams.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C9 -->
+      <a href="calculators/rebar-weight/" class="tool-card" data-tags="detailing rebar schedule weight">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Detailing & Quantities</span>
+            <span class="code-badge">Schedule</span>
+          </div>
+          <h2>Rebar Weight & Quantity List</h2>
+          <p>Interactive bar schedule, exact kg/m vs rule of thumb, wastage calculation, and CSV export.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C10 -->
+      <a href="calculators/retaining-wall/" class="tool-card" data-tags="geotechnical retaining wall stability BS8110">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Earth Retaining</span>
+            <span class="code-badge">Stability + BS 8110</span>
+          </div>
+          <h2>Cantilever Retaining Wall</h2>
+          <p>Overturning, sliding, and bearing pressure stability plus stem base flexure and shear design.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+
+      <!-- C11 -->
+      <a href="calculators/unit-converter/" class="tool-card" data-tags="utilities units conversion SI US">
+        <div>
+          <div class="tool-card-header">
+            <span class="tool-tag">Utilities</span>
+            <span class="code-badge">SI ↔ US Customary</span>
+          </div>
+          <h2>Engineering Unit Converter</h2>
+          <p>High-precision conversions for stress (MPa/ksi), forces (kN/kip), moments, line loads, density, and second moment of area.</p>
+        </div>
+        <div class="tool-card-footer">
+          <span style="color: var(--color-blue); font-weight: 600;">Launch Tool →</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="ces-disclaimer">
+      <strong>Engineering Disclaimer:</strong> Free tool suite developed for checking, preliminary design, and learning purposes. Results must be verified by a qualified Professional Engineer before construction or submission. Civil Engineer Society accepts no liability for designs derived from these tools.
+    </div>
+  </div>
+
+  <script>
+    // Search and filter interactions
+    const searchInput = document.getElementById('searchInput');
+    const filterPills = document.getElementById('filterPills');
+    const cards = document.querySelectorAll('.tool-card');
+
+    function filterTools() {
+      const query = searchInput.value.toLowerCase();
+      const activeFilter = filterPills.querySelector('.pill.active').dataset.filter;
+
+      cards.forEach(card => {
+        const text = card.textContent.toLowerCase();
+        const tags = card.dataset.tags.toLowerCase();
+        const matchesQuery = !query || text.includes(query) || tags.includes(query);
+        const matchesFilter = activeFilter === 'all' || tags.includes(activeFilter.toLowerCase());
+
+        card.style.display = (matchesQuery && matchesFilter) ? 'flex' : 'none';
+      });
+    }
+
+    searchInput.addEventListener('input', filterTools);
+    filterPills.addEventListener('click', (e) => {
+      if (e.target.classList.contains('pill')) {
+        filterPills.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+        e.target.classList.add('active');
+        filterTools();
+      }
+    });
+  </script>
+</body>
+</html>
