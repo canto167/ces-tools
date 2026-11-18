@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Engineering Unit Converter (SI ↔ US Customary) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+  <style>
+    .preset-btn {
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .preset-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--primary-color);
+    }
+    .conversion-result-box {
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(30, 64, 175, 0.04) 100%);
+      border: 1.5px solid var(--primary-color);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .conversion-value {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--primary-color);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Document:</strong> Structural Engineering Unit Conversion Record</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-UNIT-01</td>
+      </tr>
+      <tr>
+        <td><strong>Standard:</strong> NIST SP 811 / ISO 80000 High-Precision Factors</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container" style="max-width: 1000px;">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Engineering Unit Converter</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">High-Precision Bidirectional Conversion (SI & US Customary)</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <!-- Quick Presets -->
+    <div class="card no-print" style="margin-bottom: 20px;">
+      <div style="font-weight: 600; font-size: 13px; margin-bottom: 10px; color: var(--text-muted);">Common Structural Engineering Presets:</div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+        <button type="button" class="preset-btn" data-cat="stress" data-from="ksi" data-to="MPa" data-val="1">1 ksi → MPa</button>
+        <button type="button" class="preset-btn" data-cat="force" data-from="kip" data-to="kN" data-val="1">1 kip → kN</button>
+        <button type="button" class="preset-btn" data-cat="moment" data-from="kip·ft" data-to="kNm" data-val="1">1 kip·ft → kNm</button>
+        <button type="button" class="preset-btn" data-cat="area_load" data-from="psf" data-to="kN/m2" data-val="1">1 psf → kN/m²</button>
+        <button type="button" class="preset-btn" data-cat="density" data-from="lb/ft3" data-to="kN/m3" data-val="1">1 lb/ft³ → kN/m³</button>
+        <button type="button" class="preset-btn" data-cat="inertia" data-from="in4" data-to="mm4" data-val="1">1 in⁴ → mm⁴</button>
+        <button type="button" class="preset-btn" data-cat="modulus" data-from="in3" data-to="mm3" data-val="1">1 in³ → mm³</button>
+      </div>
+    </div>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Converter Controls -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Engineering Quantity Category</div>
+          <div class="form-group">
+            <select id="categorySelect" class="form-select" style="font-size: 15px; font-weight: 600;"></select>
+          </div>
+
+          <div style="margin-top: 16px;">
+            <div class="form-group">
+              <label class="form-label" for="inputValue">Source Value</label>
+              <input type="number" id="inputValue" class="form-input" value="1.0" step="any" style="font-size: 16px; font-weight: bold;">
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+              <label class="form-label" for="fromUnitSelect">From Unit</label>
+              <select id="fromUnitSelect" class="form-select"></select>
+            </div>
+
+            <div style="text-align: center; margin: 12px 0;">
+              <button type="button" id="btnSwapUnits" class="btn" style="padding: 4px 12px; font-size: 14px;" title="Swap Units">⇄ Swap Units</button>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="toUnitSelect">To Unit</label>
+              <select id="toUnitSelect" class="form-select"></select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Conversion Output & All Units Table -->
+      <div class="ces-results-panel">
+        <div class="conversion-result-box">
+          <div style="font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">Converted Result</div>
+          <div id="outputValue" class="conversion-value">—</div>
+          <div id="outputUnitLabel" style="font-size: 14px; font-weight: 600; color: var(--text-main); margin-top: 4px;">—</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">All Category Unit Equivalents</div>
+          <div style="overflow-x: auto;">
+            <table class="calc-table">
+              <thead>
+                <tr>
+                  <th>Unit</th>
+                  <th style="text-align: right;">Standard Value</th>
+                  <th style="text-align: right;">Scientific Notation</th>
+                </tr>
+              </thead>
+              <tbody id="allUnitsTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Engineering Unit Converter v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Standards:</strong> Conversion factors strictly conform to NIST Special Publication 811 (Guide for the Use of the International System of Units) and ISO 80000.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initUnitConverterUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initUnitConverterUI();
+    });
+  </script>
+</body>
+</html>

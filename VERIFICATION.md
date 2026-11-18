@@ -208,3 +208,10 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C10 retaining-wall** | Test B | Mr (kNm/m) | 351.0 | 351.00 | 0.00% | 🟢 PASS |
 | **C10 retaining-wall** | Test B | FoS Overturning | 2.99 | 2.99 | 0.00% | 🟢 PASS |
 | **C10 retaining-wall** | Test B | FoS Sliding | 1.34 | 1.34 | 0.00% | 🟢 PASS (FAIL verified) |
+| **C11 unit-converter** | Stress | 1 ksi → MPa | 6.894757 | 6.894757 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Force | 1 kip → kN | 4.448222 | 4.448222 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Moment | 1 kip·ft → kNm | 1.355818 | 1.355818 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Area Load | 1 psf → kN/m² | 0.04788026 | 0.04788026 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Density | 1 lb/ft³ → kN/m³ | 0.1570875 | 0.1570875 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Inertia | 1 in⁴ → mm⁴ | 416231.4 | 416231.43 | 0.000% | 🟢 PASS |
+| **C11 unit-converter** | Modulus | 1 in³ → mm³ | 16387.06 | 16387.06 | 0.000% | 🟢 PASS |
