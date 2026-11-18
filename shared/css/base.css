@@ -142,7 +142,20 @@ body {
   gap: 20px;
 }
 
+.ces-split-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+/* Wide tables scroll inside their card instead of being cut off */
+.card table { max-width: 100%; }
+.card:has(> table), .table-scroll { overflow-x: auto; }
+
 @media (min-width: 900px) {
+  .ces-split-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+  }
   .ces-calculator-grid {
     grid-template-columns: 460px 1fr;
     align-items: start;

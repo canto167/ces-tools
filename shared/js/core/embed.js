@@ -1,6 +1,11 @@
 /**
  * Responsive iframe embed helper
- * Sends document scrollHeight to parent page via postMessage.
+ * Sends the height of the page CONTENT to the parent page via postMessage.
+ *
+ * It measures document.body (content height), not document.documentElement.scrollHeight:
+ * inside an iframe the scroll height is never smaller than the iframe itself, so reporting it
+ * made the parent grow the iframe on every message (runaway height). Only real changes of
+ * more than 2 px are sent.
  */
 
 export const Embed = {
@@ -10,23 +15,34 @@ export const Embed = {
       return;
     }
 
+    let lastSent = 0;
+    let pending = false;
+
+    const measure = () => Math.ceil(document.body.getBoundingClientRect().height);
+
     const sendHeight = () => {
-      const height = document.documentElement.scrollHeight || document.body.scrollHeight;
-      window.parent.postMessage({
-        type: 'ces-tool-resize',
-        slug,
-        height
-      }, '*');
+      pending = false;
+      const height = measure();
+      if (!height || Math.abs(height - lastSent) <= 2) return;
+      lastSent = height;
+      window.parent.postMessage({ type: 'ces-tool-resize', slug, height }, '*');
     };
 
-    window.addEventListener('load', sendHeight);
-    window.addEventListener('resize', sendHeight);
-    
-    // Observe DOM mutations for height changes
-    const observer = new MutationObserver(sendHeight);
-    observer.observe(document.body, { childList: true, subtree: true, attributes: true });
+    const schedule = () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(sendHeight);
+    };
 
-    // Initial ping
-    sendHeight();
+    window.addEventListener('load', schedule);
+
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(schedule).observe(document.body);
+    } else {
+      window.addEventListener('resize', schedule);
+      new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true });
+    }
+
+    schedule();
   }
 };
