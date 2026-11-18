@@ -29,7 +29,7 @@
 - [x] **C9: Rebar Weight & Quantity List** (`rebar-weight`) 🟢 (4/4 Tests Pass; 4 Screenshots)
 - [x] **C10: Cantilever Retaining Wall** (`retaining-wall`) — Stability + BS 8110 Stem 🟢 (3/3 Tests Pass; 4 Screenshots)
 - [x] **C11: Engineering Unit Converter** (`unit-converter`) — SI & US 🟢 (8/8 Tests Pass; 4 Screenshots)
-- [x] **Hardening Pass (STRUCT-Agent & Codex Hardening)** 🟢 (61/61 Total Tests Pass; Statutory Invariants & Negative Guard Tests)
+- [x] **Hardening Pass (Claude Audit Blockers B1–B5 & STATUTORY Hardening)** 🟢 (73/73 Total Tests Pass; B1 Fixed Reaction Equilibrium, B2 Scoped Internal Perimeter & Beta Clamp, B3 Universal Report Schema Adapter, B4 Ductility K<=K' Guards Across Slabs/Footings/Walls, B5 Retaining Wall Scope Limitation, S1–S4 Falsy & Detailing Guards)
 
 ---
 
