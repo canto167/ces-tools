@@ -11,7 +11,7 @@
 
   <iframe
     id="ces-iframe-short-column"
-    src="https://REPLACE-ME.github.io/ces-tools/calculators/short-column/"
+    src="https://canto167.github.io/ces-tools/calculators/short-column/"
     style="width: 100%; height: 960px; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"
     loading="lazy"
     scrolling="no"
@@ -22,7 +22,7 @@
     <div style="padding: 16px; background: #eff6ff; border: 1px solid #2563eb; border-radius: 6px; margin-top: 10px;">
       <p style="margin: 0; color: #1e3a8a; font-size: 13px;">
         JavaScript is required to run the interactive calculator. Please visit the standalone version at:
-        <a href="https://REPLACE-ME.github.io/ces-tools/calculators/short-column/" target="_blank" rel="noopener" style="color: #2563eb; font-weight: bold;">
+        <a href="https://canto167.github.io/ces-tools/calculators/short-column/" target="_blank" rel="noopener" style="color: #2563eb; font-weight: bold;">
           Open Standalone Short Column Calculator
         </a>
       </p>
@@ -31,7 +31,7 @@
 
   <script>
     window.addEventListener('message', function(e) {
-      if (e.data && e.data.type === 'ces-tool-resize' && e.data.slug === 'short-column') {
+      if (e.origin === 'https://canto167.github.io' && e.data && e.data.type === 'ces-tool-resize' && e.data.slug === 'short-column') {
         var iframe = document.getElementById('ces-iframe-short-column');
         if (iframe && e.data.height) {
           iframe.style.height = (e.data.height + 20) + 'px';
