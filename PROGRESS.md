@@ -22,8 +22,8 @@
 - [x] **C2: One-Way Slab** (`one-way-slab`) — EC2 & BS 8110 🟢 (3/3 Tests Pass; 4 Screenshots)
 - [x] **C3: Two-Way Slab (Simply Supported)** (`two-way-slab`) — BS 8110 Table 3.13 🟢 (1/1 Tests Pass; 4 Screenshots)
 - [x] **C4: Punching Shear** (`punching-shear`) — EC2 🟢 (1/1 Tests Pass; 4 Screenshots)
-- [ ] **C5: Square Pad Footing** (`pad-footing`) — BS 8110 ⚪
-- [ ] **C6: Short Braced Column (Axial)** (`short-column`) — BS 8110 ⚪
+- [x] **C5: Square Pad Footing** (`pad-footing`) — BS 8110 🟢 (1/1 Tests Pass; 4 Screenshots)
+- [ ] **C6: Short Braced Column (Axial)** (`short-column`) — BS 8110 🟡
 - [ ] **C7: Anchorage & Lap Length** (`anchorage-lap`) — EC2 & BS 8110 ⚪
 - [ ] **C8: Beam Formulas (SFD, BMD, Deflection)** (`beam-formulas`) — 4 Support Types ⚪
 - [ ] **C9: Rebar Weight & Quantity List** (`rebar-weight`) ⚪

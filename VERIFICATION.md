@@ -105,19 +105,23 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C3 two-way-slab** | BS-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
 | **C3 two-way-slab** | BS-1 | v (N/mm²) | 0.167 | 0.167 | 0.00% | 🟢 PASS |
 | **C3 two-way-slab** | BS-1 | vc (N/mm²) | 0.561 | 0.560 | 0.18% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | u0 (mm) | 1600.0 | 1600.00 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | vEd,0 (N/mm²) | 2.567 | 2.567 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | vRd,max (0.4) (N/mm²) | 4.224 | 4.224 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | vRd,max (0.5 UK) (N/mm²) | 5.280 | 5.280 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | u1 at 2d (mm) | 4238.9 | 4238.94 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | vEd,1 (N/mm²) | 0.969 | 0.969 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | k | 1.976 | 1.976 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | vRd,c (N/mm²) | 0.669 | 0.669 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | v_min (N/mm²) | 0.532 | 0.532 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | fywd,ef (N/mm²) | 302.5 | 302.50 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | Asw/sr (mm²/mm) | 4.362 | 4.362 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | Asw per perim (mm²) | 654.2 | 654.23 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | Link legs per perim | 9 | 9 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | uout (mm) | 6135.7 | 6135.66 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | r_out (mm) | 721.9 | 721.88 | 0.00% | 🟢 PASS |
-| **C4 punching-shear** | EC2-1 | last perim dist (mm) | 406.9 | 406.88 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | self-weight (kN) | 104.98 | 104.98 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | service q (kN/m²) | 179.0 | 179.01 | 0.01% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | N (kN) | 1760.0 | 1760.00 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | pu (kN/m²) | 241.43 | 241.43 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | d (mm) | 534.0 | 534.00 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | a (m) | 1.15 | 1.15 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | M (kNm) | 431.04 | 431.04 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | K | 0.0187 | 0.0187 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | z (mm) | 507.3 | 507.30 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | As (mm²) | 1953.3 | 1953.34 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | As,min (mm²) | 2106.0 | 2106.00 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | As,prov (mm²) | 3619.1 | 3619.11 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | v_face (N/mm²) | 2.060 | 2.060 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | vmax (N/mm²) | 4.382 | 4.382 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | vc (N/mm²) | 0.424 | 0.424 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | perim_side (mm) | 2002.0 | 2002.00 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | Vpunch (kN) | 792.4 | 792.40 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | v_punch (N/mm²) | 0.185 | 0.185 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | Vbeam (kN) | 401.5 | 401.49 | 0.00% | 🟢 PASS |
+| **C5 pad-footing** | BS-1 | v_beam (N/mm²) | 0.278 | 0.278 | 0.00% | 🟢 PASS |
