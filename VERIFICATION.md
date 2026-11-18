@@ -174,3 +174,11 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C8 beam-formulas** | Test 6 (Propped Cant)| MA (kNm) | -45.0 | -45.00 | 0.00% | 🟢 PASS |
 | **C8 beam-formulas** | Test 6 (Propped Cant)| Msag,max (kNm) | 25.3125 | 25.3125 | 0.00% | 🟢 PASS |
 | **C8 beam-formulas** | Test 6 (Propped Cant)| delta_max (mm) | 3.51 | 3.503 | 0.20% | 🟢 PASS |
+| **C9 rebar-weight** | phi12 | Exact kg/m | 0.8878 | 0.8878 | 0.00% | 🟢 PASS |
+| **C9 rebar-weight** | phi12 | Rule kg/m | 0.889 | 0.889 | 0.01% | 🟢 PASS |
+| **C9 rebar-weight** | phi16 | Exact kg/m | 1.5783 | 1.5783 | 0.00% | 🟢 PASS |
+| **C9 rebar-weight** | phi16 | Rule kg/m | 1.580 | 1.580 | 0.02% | 🟢 PASS |
+| **C9 rebar-weight** | phi20 | Exact kg/m | 2.4662 | 2.4662 | 0.00% | 🟢 PASS |
+| **C9 rebar-weight** | phi20 | Rule kg/m | 2.469 | 2.469 | 0.01% | 🟢 PASS |
+| **C9 rebar-weight** | Row Test | Total Length (m) | 240.0 | 240.00 | 0.00% | 🟢 PASS |
+| **C9 rebar-weight** | Row Test | Total Weight (kg)| 378.8 | 378.80 | 0.00% | 🟢 PASS |

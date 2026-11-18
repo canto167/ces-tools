@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rebar Weight and Quantity Schedule Calculator — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+  <style>
+    .form-input-sm, .form-select-sm {
+      padding: 4px 6px;
+      font-size: 13px;
+    }
+    .btn-sm {
+      padding: 4px 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+    .btn-outline-danger {
+      border: 1px solid #ef4444;
+      background: transparent;
+      color: #ef4444;
+      cursor: pointer;
+    }
+    .btn-outline-danger:hover {
+      background: #ef4444;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Reinforcement Take-Off & Bar Schedule</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-STEEL-01</td>
+      </tr>
+      <tr>
+        <td><strong>Schedule:</strong> Cut Lengths, Weights & Diameter Subtotals</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Material Specification:</strong> BS 4449 / EN 10080 Steel (ρ = 7850 kg/m³)</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE / QS</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container" style="max-width: 1200px;">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Rebar Weight and Quantity Schedule</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Exact Theoretical Mass (7850 kg/m³), Rule of Thumb (φ²/162), & CSV Export</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Acceptance Test</button>
+        <button type="button" id="btnExportCSV" class="btn">Export CSV</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div class="card" style="margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+        <div class="card-title" style="margin-bottom: 0;">Bar Cutting & Take-Off Schedule</div>
+        <div class="no-print" style="display: flex; gap: 12px; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <label for="wastagePct" style="font-size: 13px; font-weight: 600;">Wastage Allowance:</label>
+            <div style="width: 80px;">
+              <input type="number" id="wastagePct" class="form-input form-input-sm" value="5" min="0" max="25" step="1">
+            </div>
+            <span style="font-size: 13px;">%</span>
+          </div>
+          <button type="button" id="btnAddRow" class="btn btn-primary btn-sm">+ Add Bar Row</button>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="calc-table">
+          <thead>
+            <tr>
+              <th style="width: 90px;">Bar Mark</th>
+              <th style="width: 90px;">Diameter</th>
+              <th style="width: 90px;">Members</th>
+              <th style="width: 90px;">Bars/Mbr</th>
+              <th style="width: 100px;">Length (m)</th>
+              <th style="text-align: right; width: 110px;">Total Length</th>
+              <th style="text-align: right; width: 100px;">kg/m</th>
+              <th style="text-align: right; width: 110px;">Total Weight</th>
+              <th class="no-print" style="text-align: center; width: 60px;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleTableBody"></tbody>
+        </table>
+      </div>
+
+      <div id="summaryGrid" class="summary-grid" style="margin-top: 20px;"></div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 20px;">
+      <!-- Subtotals by Diameter -->
+      <div class="card">
+        <div class="card-title">Diameter Subtotals & Tonnage Breakdown</div>
+        <div style="overflow-x: auto;">
+          <table class="calc-table">
+            <thead>
+              <tr>
+                <th>Diameter</th>
+                <th>Exact kg/m</th>
+                <th>Rule kg/m</th>
+                <th style="text-align: right;">Total Bars</th>
+                <th style="text-align: right;">Length (m)</th>
+                <th style="text-align: right;">Weight (kg)</th>
+                <th style="text-align: right;">Tonnes</th>
+              </tr>
+            </thead>
+            <tbody id="diaSubtotalBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Unit Weight Reference Table -->
+      <div class="card">
+        <div class="card-title">Standard Unit Weights Reference</div>
+        <div style="overflow-x: auto;">
+          <table class="calc-table">
+            <thead>
+              <tr>
+                <th>Bar Size</th>
+                <th>Exact (7850 kg/m³)</th>
+                <th>Site Rule (φ²/162)</th>
+                <th>Variance</th>
+              </tr>
+            </thead>
+            <tbody id="unitWeightBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Rebar Weight and Quantity Schedule v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for quantity take-off and estimating verification. Rolling margins and site cutting allowances must be verified against actual mill certificates and procurement contracts.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initRebarWeightUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initRebarWeightUI();
+    });
+  </script>
+</body>
+</html>

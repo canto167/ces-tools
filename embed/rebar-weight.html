@@ -1,0 +1,42 @@
+<!--
+  Civil Engineer Society (CES) - Responsive Blogger Embed Snippet
+  Tool: Rebar Weight & Quantity Schedule Calculator
+  Instructions: Copy and paste this HTML snippet directly into Blogger Post/Page (HTML View).
+-->
+
+<div class="ces-embed-wrapper" style="width: 100%; max-width: 1100px; margin: 20px auto; font-family: ui-sans-serif, system-ui, sans-serif;">
+  <p style="font-size: 14px; color: #475569; margin-bottom: 12px; line-height: 1.5;">
+    Interactive reinforcing steel weight and quantity take-off schedule. Computes exact theoretical weights (7850 kg/m³), site rule of thumb (φ²/162), diameter subtotals, wastage allowances, and exports directly to CSV.
+  </p>
+
+  <iframe
+    id="ces-iframe-rebar-weight"
+    src="https://REPLACE-ME.github.io/ces-tools/calculators/rebar-weight/"
+    style="width: 100%; height: 950px; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"
+    loading="lazy"
+    scrolling="no"
+    title="Rebar Weight and Quantity Schedule — Civil Engineer Society"
+  ></iframe>
+
+  <noscript>
+    <div style="padding: 16px; background: #eff6ff; border: 1px solid #2563eb; border-radius: 6px; margin-top: 10px;">
+      <p style="margin: 0; color: #1e3a8a; font-size: 13px;">
+        JavaScript is required to run the interactive calculator. Please visit the standalone version at:
+        <a href="https://REPLACE-ME.github.io/ces-tools/calculators/rebar-weight/" target="_blank" rel="noopener" style="color: #2563eb; font-weight: bold;">
+          Open Standalone Rebar Schedule Calculator
+        </a>
+      </p>
+    </div>
+  </noscript>
+
+  <script>
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ces-tool-resize' && e.data.slug === 'rebar-weight') {
+        var iframe = document.getElementById('ces-iframe-rebar-weight');
+        if (iframe && e.data.height) {
+          iframe.style.height = (e.data.height + 20) + 'px';
+        }
+      }
+    });
+  </script>
+</div>
