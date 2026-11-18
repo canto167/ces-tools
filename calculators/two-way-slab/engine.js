@@ -21,6 +21,9 @@ const TABLE_313 = [
 function interpolateTable313(ratio) {
   if (ratio <= 1.0) return { asx: TABLE_313[0].asx, asy: TABLE_313[0].asy };
   if (ratio >= 2.0) {
+    if (ratio > 2.0) {
+      return { asx: 0.125, asy: 0.0 };
+    }
     const last = TABLE_313[TABLE_313.length - 1];
     return { asx: last.asx, asy: last.asy };
   }
@@ -45,18 +48,18 @@ export function calculateTwoWaySlab(input) {
   const report = new CalculationReport();
   const results = {};
 
-  const lx = Number(input.lx);
-  const ly = Number(input.ly);
-  const h = Number(input.h);
-  const cover = Number(input.cover);
-  const dia = Number(input.bar_dia || 10);
-  const sx = Number(input.sx || 200);
-  const sy = Number(input.sy || 300);
+  const lx = Number(input && input.lx);
+  const ly = Number(input && input.ly);
+  const h = Number(input && input.h);
+  const cover = Number(input && input.cover);
+  const dia = input && input.bar_dia !== undefined ? Number(input.bar_dia) : 10;
+  const sx = input && input.sx !== undefined ? Number(input.sx) : 200;
+  const sy = input && input.sy !== undefined ? Number(input.sy) : 300;
 
-  const finishes = Number(input.finishes || 0);
-  const qk = Number(input.qk || 0);
-  const fcu = Number(input.fcu || 30);
-  const fy = Number(input.fy || 500);
+  const finishes = input && input.finishes !== undefined ? Number(input.finishes) : 0;
+  const qk = input && input.qk !== undefined ? Number(input.qk) : 0;
+  const fcu = input && input.fcu !== undefined ? Number(input.fcu) : 30;
+  const fy = input && input.fy !== undefined ? Number(input.fy) : 500;
 
   if (!Validate.isNumber(lx) || lx <= 0) errors.push('Short span lx must be greater than 0.');
   if (!Validate.isNumber(ly) || ly <= 0) errors.push('Long span ly must be greater than 0.');
@@ -64,6 +67,10 @@ export function calculateTwoWaySlab(input) {
   if (!Validate.isNumber(h) || h < 75) errors.push(`Slab overall depth h must be at least 75 mm (got ${h}).`);
   const coverCheck = Validate.coverSanity(cover, lx * 1000, h);
   if (!coverCheck.valid) errors.push(coverCheck.error);
+
+  if (!Validate.isNumber(dia) || dia <= 0) errors.push('Bar diameter must be greater than 0.');
+  if (!Validate.isNumber(sx) || sx <= 0) errors.push('Short span bar spacing sx must be greater than 0.');
+  if (!Validate.isNumber(sy) || sy <= 0) errors.push('Long span bar spacing sy must be greater than 0.');
 
   const concCheck = Validate.concreteStrength(fcu, 'BS8110');
   if (!concCheck.valid) errors.push(concCheck.error);
@@ -100,10 +107,21 @@ export function calculateTwoWaySlab(input) {
 
   const b = 1000.0;
   const Kx = (msx * 1e6) / (b * dx * dx * fcu);
+  const Ky = (msy * 1e6) / (b * dy * dy * fcu);
+  const K_prime = 0.156;
+  const pass_Kx = Kx <= K_prime;
+  const pass_Ky = Ky <= K_prime;
+
+  if (!pass_Kx) {
+    warnings.push(`Short span section is over-reinforced (Kx = ${Kx.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; slab depth h must be increased.`);
+  }
+  if (!pass_Ky) {
+    warnings.push(`Long span section is over-reinforced (Ky = ${Ky.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; slab depth h must be increased.`);
+  }
+
   const zx = Math.min(dx * (0.5 + Math.sqrt(Math.max(0, 0.25 - Kx / 0.9))), 0.95 * dx);
   const Asx = (msx * 1e6) / (0.87 * fy * zx);
 
-  const Ky = (msy * 1e6) / (b * dy * dy * fcu);
   const zy = Math.min(dy * (0.5 + Math.sqrt(Math.max(0, 0.25 - Ky / 0.9))), 0.95 * dy);
   const Asy = (msy * 1e6) / (0.87 * fy * zy);
 
@@ -177,6 +195,30 @@ export function calculateTwoWaySlab(input) {
     value: msy,
     unit: 'kNm/m',
     clause: 'BS 8110 Cl 3.5.3.3'
+  });
+
+  report.addCheck({
+    name: "Short Span Section Ductility (Kx <= K')",
+    demand: Kx,
+    capacity: K_prime,
+    status: pass_Kx ? 'PASS' : 'FAIL',
+    clause: 'BS 8110 Cl 3.4.4.4',
+    unit: 'ratio',
+    message: pass_Kx
+      ? `Kx = ${Kx.toFixed(4)} <= K' = ${K_prime} (singly reinforced ductile section)`
+      : `Short span is over-reinforced (Kx = ${Kx.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Slab depth h must be increased.`
+  });
+
+  report.addCheck({
+    name: "Long Span Section Ductility (Ky <= K')",
+    demand: Ky,
+    capacity: K_prime,
+    status: pass_Ky ? 'PASS' : 'FAIL',
+    clause: 'BS 8110 Cl 3.4.4.4',
+    unit: 'ratio',
+    message: pass_Ky
+      ? `Ky = ${Ky.toFixed(4)} <= K' = ${K_prime} (singly reinforced ductile section)`
+      : `Long span is over-reinforced (Ky = ${Ky.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Slab depth h must be increased.`
   });
 
   report.addCheck({

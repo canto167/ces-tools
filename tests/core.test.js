@@ -82,6 +82,37 @@ describe('Core Helper Test Suite', () => {
     expectClose(report.getChecks()[0].ratio, 1075.5 / 1256.6, 0.01, 'Check ratio');
   });
 
+  test('CalculationReport adapter maps legacy and standard schema properties seamlessly', () => {
+    const report = new CalculationReport();
+    report.addStep({
+      ref: 'BS 8110 Cl 3.11',
+      description: 'Legacy Step Description',
+      formula: 'x = y + z',
+      values: '10 = 4 + 6'
+    });
+
+    report.addCheck({
+      title: 'Legacy Check Title',
+      actual: 120,
+      allowable: 150,
+      pass: true,
+      ref: 'BS 8110 Cl 3.11.2.1'
+    });
+
+    const step = report.getSteps()[0];
+    assert.strictEqual(step.label, 'Legacy Step Description');
+    assert.strictEqual(step.equation, 'x = y + z');
+    assert.strictEqual(step.substituted, '10 = 4 + 6');
+    assert.strictEqual(step.clause, 'BS 8110 Cl 3.11');
+
+    const check = report.getChecks()[0];
+    assert.strictEqual(check.name, 'Legacy Check Title');
+    assert.strictEqual(check.demand, 120);
+    assert.strictEqual(check.capacity, 150);
+    assert.strictEqual(check.status, 'PASS');
+    assert.strictEqual(check.clause, 'BS 8110 Cl 3.11.2.1');
+  });
+
   test('Share serializes and deserializes parameters', () => {
     const input = { code: 'EC2', b: 300, h: 500, active: true };
     const query = Share.serialize(input);

@@ -111,6 +111,27 @@ test('C8 Beam Formulas & Diagrams Acceptance Test Suite', async (t) => {
     expectClose(res.maxDeflection_mm, 1.6875, 0.5, 'Midspan deflection (mm)');
   });
 
+  await t.test('Test 5b: Fixed–Fixed Unsymmetrical Point Load (B1 Verification: P=40kN at a=1.5m on L=6m)', () => {
+    const res = calculateBeam({
+      supportType: 'fixed_fixed',
+      L: 6.0,
+      pointLoads: [{ P: 40, a: 1.5 }],
+      E,
+      I
+    });
+
+    // Exact theoretical values:
+    // b = 4.5m
+    // MA = -P*a*b^2/L^2 = -40*1.5*20.25/36 = -33.75 kNm
+    // MB = +P*a^2*b/L^2 = +40*2.25*4.5/36 = +11.25 kNm
+    // RB = P*a^2*(3L - 2a)/L^3 = 40*2.25*15/216 = 6.25 kN
+    // RA = 40 - 6.25 = 33.75 kN
+    expectClose(res.MA, -33.75, 0.5, 'Fixed end moment MA');
+    expectClose(res.MB, 11.25, 0.5, 'Fixed end moment MB');
+    expectClose(res.RA, 33.75, 0.5, 'Left vertical reaction RA');
+    expectClose(res.RB, 6.25, 0.5, 'Right vertical reaction RB');
+  });
+
   await t.test('Test 6: Propped Cantilever, L=6m, UDL=10 kN/m', () => {
     const res = calculateBeam({
       supportType: 'propped_cantilever',

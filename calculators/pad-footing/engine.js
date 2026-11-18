@@ -34,6 +34,8 @@ export function calculatePadFooting(input) {
   if (!Validate.isNumber(h) || h < 200) errors.push(`Footing thickness h must be at least 200 mm (got ${h}).`);
   if (!Validate.isNumber(col_c) || col_c < 100) errors.push(`Column dimension must be at least 100 mm (got ${col_c}).`);
   if (col_c >= B * 1000) errors.push('Column size cannot exceed footing width.');
+  if (!Validate.isNumber(spacing) || spacing <= 0) errors.push('Bar spacing must be greater than 0.');
+  if (!Validate.isNumber(dia) || dia <= 0) errors.push('Bar diameter must be greater than 0.');
 
   const coverCheck = Validate.coverSanity(cover, B * 1000, h);
   if (!coverCheck.valid) errors.push(coverCheck.error);
@@ -125,6 +127,12 @@ export function calculatePadFooting(input) {
   const h_mm = h;
 
   const K = (M * 1e6) / (B_mm * d * d * fcu);
+  const K_prime = 0.156;
+  const pass_K = K <= K_prime;
+  if (!pass_K) {
+    warnings.push(`Footing section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; footing thickness h must be increased.`);
+  }
+
   const z = Math.min(d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 0.9))), 0.95 * d);
   const As = (M * 1e6) / (0.87 * fy * z);
   const As_min = 0.0013 * B_mm * h_mm;
@@ -167,6 +175,18 @@ export function calculatePadFooting(input) {
     value: As,
     unit: 'mm²',
     clause: 'BS 8110 Cl 3.4.4.4'
+  });
+
+  report.addCheck({
+    name: "Footing Flexure Ductility (K <= K')",
+    demand: K,
+    capacity: K_prime,
+    status: pass_K ? 'PASS' : 'FAIL',
+    clause: 'BS 8110 Cl 3.4.4.4',
+    unit: 'ratio',
+    message: pass_K
+      ? `K = ${K.toFixed(4)} <= K' = ${K_prime} (singly reinforced footing ductile section)`
+      : `Footing section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Footing thickness h must be increased.`
   });
 
   report.addCheck({

@@ -1,25 +1,31 @@
 /**
  * Step-by-step engineering calculation report builder
  * Generates transparent clauses, equations, substitutions and checks.
+ * Built with universal adapter supporting standard and alternate field naming schemas.
  */
 
 export class CalculationReport {
-  constructor() {
+  constructor(metadata = {}) {
+    this.title = metadata.title || '';
+    this.subtitle = metadata.subtitle || '';
+    this.code = metadata.code || '';
     this.steps = [];
     this.checks = [];
   }
 
   /**
    * Add calculation step
-   * @param {Object} param
-   * @param {string} param.label
-   * @param {string} param.equation
-   * @param {string} param.substituted
-   * @param {number|string} param.value
-   * @param {string} param.unit
-   * @param {string} param.clause
+   * Supports standard { label, equation, substituted, value, unit, clause }
+   * and legacy { description/title, formula, values, ref }
    */
-  addStep({ label, equation, substituted, value, unit = '', clause = '' }) {
+  addStep(step) {
+    const label = step.label || step.description || step.title || step.ref || 'Step';
+    const equation = step.equation || step.formula || '';
+    const substituted = step.substituted || step.values || '';
+    const value = step.value !== undefined ? step.value : (step.values !== undefined ? step.values : '');
+    const unit = step.unit || '';
+    const clause = step.clause || step.ref || '';
+
     this.steps.push({
       label,
       equation,
@@ -32,19 +38,38 @@ export class CalculationReport {
 
   /**
    * Add design limit state check
-   * @param {Object} param
-   * @param {string} param.name
-   * @param {number} param.demand
-   * @param {number} param.capacity
-   * @param {number} [param.ratio] (optional, computed if omitted)
-   * @param {'PASS'|'FAIL'|'WARN'} [param.status]
-   * @param {string} param.clause
-   * @param {string} [param.unit]
-   * @param {string} [param.message]
+   * Supports standard { name, demand, capacity, ratio, status, clause, unit, message }
+   * and legacy { title, actual, allowable/limit, pass }
    */
-  addCheck({ name, demand, capacity, ratio, status, clause = '', unit = '', message = '' }) {
-    const computedRatio = ratio !== undefined ? ratio : (capacity > 0 ? demand / capacity : Infinity);
-    const computedStatus = status || (computedRatio <= 1.0 ? 'PASS' : 'FAIL');
+  addCheck(check) {
+    const name = check.name || check.title || 'Design Check';
+    const demand = check.demand !== undefined ? check.demand : (check.actual !== undefined ? check.actual : 0);
+    const capacity = check.capacity !== undefined ? check.capacity : (check.allowable !== undefined ? check.allowable : (check.limit !== undefined ? check.limit : 0));
+    
+    let computedRatio = check.ratio;
+    if (computedRatio === undefined) {
+      if (typeof capacity === 'number' && capacity > 0 && typeof demand === 'number') {
+        computedRatio = demand / capacity;
+      } else {
+        computedRatio = 0;
+      }
+    }
+
+    let computedStatus = check.status;
+    if (!computedStatus) {
+      if (check.pass !== undefined) {
+        computedStatus = check.pass ? 'PASS' : 'FAIL';
+      } else if (computedRatio !== undefined && typeof computedRatio === 'number') {
+        computedStatus = computedRatio <= 1.0 ? 'PASS' : 'FAIL';
+      } else {
+        computedStatus = 'PASS';
+      }
+    }
+
+    const clause = check.clause || check.ref || '';
+    const unit = check.unit || '';
+    const defaultMsg = computedStatus === 'PASS' ? 'Design check satisfied' : 'Design capacity exceeded';
+    const message = check.message || defaultMsg;
 
     this.checks.push({
       name,
@@ -54,7 +79,7 @@ export class CalculationReport {
       status: computedStatus,
       clause,
       unit,
-      message: message || (computedStatus === 'PASS' ? 'Design check satisfied' : 'Design capacity exceeded')
+      message
     });
   }
 

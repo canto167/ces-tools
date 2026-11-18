@@ -13,21 +13,21 @@ export function calculateOneWaySlab(input) {
   const report = new CalculationReport();
   const results = {};
 
-  const code = (input.code || 'BS8110').toUpperCase();
-  const L = Number(input.L); // m
-  const h = Number(input.h); // mm
-  const cover = Number(input.cover); // mm
-  const finishes = Number(input.finishes || 0); // kN/m²
-  const qk = Number(input.qk || 0); // kN/m²
-  const support = input.support || 'simply_supported';
+  const code = ((input && input.code) || 'BS8110').toUpperCase();
+  const L = Number(input && input.L); // m
+  const h = Number(input && input.h); // mm
+  const cover = Number(input && input.cover); // mm
+  const finishes = input && input.finishes !== undefined ? Number(input.finishes) : 0; // kN/m²
+  const qk = input && input.qk !== undefined ? Number(input.qk) : 0; // kN/m²
+  const support = input && input.support !== undefined ? input.support : 'simply_supported';
 
-  const main_dia = Number(input.main_bar_dia || 10);
-  const main_spacing = Number(input.main_bar_spacing || 150);
-  const dist_dia = Number(input.dist_bar_dia || 10);
+  const main_dia = input && input.main_bar_dia !== undefined ? Number(input.main_bar_dia) : 10;
+  const main_spacing = input && input.main_bar_spacing !== undefined ? Number(input.main_bar_spacing) : 150;
+  const dist_dia = input && input.dist_bar_dia !== undefined ? Number(input.dist_bar_dia) : 10;
 
-  const fck = Number(input.fck || input.fcu || 30);
+  const fck = input && input.fck !== undefined ? Number(input.fck) : (input && input.fcu !== undefined ? Number(input.fcu) : 30);
   const fcu = fck;
-  const fyk = Number(input.fyk || input.fy || 500);
+  const fyk = input && input.fyk !== undefined ? Number(input.fyk) : (input && input.fy !== undefined ? Number(input.fy) : 500);
   const fy = fyk;
 
   // Validation
@@ -36,6 +36,13 @@ export function calculateOneWaySlab(input) {
   const coverCheck = Validate.coverSanity(cover, 1000, h);
   if (!coverCheck.valid) errors.push(coverCheck.error);
   if (!Validate.isNumber(main_spacing) || main_spacing <= 0) errors.push('Main bar spacing must be greater than 0.');
+  if (!Validate.isNumber(main_dia) || main_dia <= 0) errors.push('Main bar diameter must be greater than 0.');
+  if (!Validate.isNumber(dist_dia) || dist_dia <= 0) errors.push('Distribution bar diameter must be greater than 0.');
+
+  const validSupports = ['simply_supported', 'end_span', 'interior_span'];
+  if (!validSupports.includes(support)) {
+    errors.push(`Invalid support condition "${support}". Supported types: ${validSupports.join(', ')}.`);
+  }
 
   const concCheck = Validate.concreteStrength(fck, code);
   if (!concCheck.valid) errors.push(concCheck.error);
@@ -135,6 +142,10 @@ export function calculateOneWaySlab(input) {
     const fyd = fyk / 1.15;
     K = (M * 1e6) / (b * d * d * fck);
     const K_prime = 0.167;
+    const pass_K = K <= K_prime;
+    if (!pass_K) {
+      warnings.push(`Section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; slab depth h must be increased.`);
+    }
 
     z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 1.134)));
     z = Math.min(z, 0.95 * d);
@@ -186,6 +197,18 @@ export function calculateOneWaySlab(input) {
     results.s_max_main = s_max_main;
 
     report.addCheck({
+      name: "Section Ductility Limit (K <= K')",
+      demand: K,
+      capacity: K_prime,
+      status: pass_K ? 'PASS' : 'FAIL',
+      clause: 'EN 1992-1-1 Cl 6.1',
+      unit: 'ratio',
+      message: pass_K
+        ? `K = ${K.toFixed(4)} <= K' = ${K_prime} (singly reinforced ductile section)`
+        : `Section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Slab depth h must be increased.`
+    });
+
+    report.addCheck({
       name: 'Flexural Reinforcement Capacity',
       demand: As_req,
       capacity: As_prov,
@@ -229,6 +252,12 @@ export function calculateOneWaySlab(input) {
   } else {
     // BS 8110
     K = (M * 1e6) / (b * d * d * fcu);
+    const K_prime = 0.156;
+    const pass_K = K <= K_prime;
+    if (!pass_K) {
+      warnings.push(`Section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; slab depth h must be increased.`);
+    }
+
     z = Math.min(d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 0.9))), 0.95 * d);
     As_req = (M * 1e6) / (0.87 * fy * z);
     As_min = 0.0013 * b * h;
@@ -263,6 +292,18 @@ export function calculateOneWaySlab(input) {
     results.ld_allowable = allowableLd;
     results.ld_actual = actualLd;
     results.s_max_main = s_max_main;
+
+    report.addCheck({
+      name: "Section Ductility Limit (K <= K')",
+      demand: K,
+      capacity: K_prime,
+      status: pass_K ? 'PASS' : 'FAIL',
+      clause: 'BS 8110 Cl 3.4.4.4',
+      unit: 'ratio',
+      message: pass_K
+        ? `K = ${K.toFixed(4)} <= K' = ${K_prime} (singly reinforced ductile section)`
+        : `Section is over-reinforced (K = ${K.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Slab depth h must be increased.`
+    });
 
     report.addCheck({
       name: 'Flexural Reinforcement Capacity',

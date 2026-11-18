@@ -15,25 +15,24 @@ export function calculatePunchingShear(input) {
 
   const col_shape = input.col_shape || 'rectangular';
   const col_type = input.col_type || 'internal';
-  const c1 = Number(input.c1 || 400);
-  const c2 = Number(input.c2 || c1);
+  const c1 = Number(input.c1 !== undefined ? input.c1 : 400);
+  const c2 = Number(input.c2 !== undefined ? input.c2 : c1);
   const d = Number(input.d);
   const VEd = Number(input.VEd); // kN
-  const fck = Number(input.fck || 30);
+  const fck = Number(input.fck !== undefined ? input.fck : 30);
   const rho_l_input = Number(input.rho_l !== undefined ? input.rho_l : 0.0075);
-  const fywk = Number(input.fywk || 500);
-  const link_dia = Number(input.link_dia || 10);
+  const fywk = Number(input.fywk !== undefined ? input.fywk : 500);
+  const link_dia = Number(input.link_dia !== undefined ? input.link_dia : 10);
   const vrdmax_factor = Number(input.vrdmax_factor !== undefined ? input.vrdmax_factor : 0.4);
 
   // Simplified beta or user specified
-  let beta = Number(input.beta);
-  if (!beta || beta <= 0) {
-    if (col_type === 'edge') beta = 1.40;
-    else if (col_type === 'corner') beta = 1.50;
-    else beta = 1.15; // internal
+  let beta = input.beta !== undefined ? Number(input.beta) : 1.15;
+
+  // 1. Validation Guards (STRUCT-Agent, Codex & Claude Hardening)
+  if (col_type !== 'internal') {
+    errors.push('Edge and corner column punching with free slab edge perimeter reduction (u1*) requires edge distance geometry and is currently reserved for Phase 2. This Phase 1 tool is strictly scoped to internal columns.');
   }
 
-  // 1. Validation Guards (STRUCT-Agent & Codex Hardening)
   if (!Validate.isNumber(d) || d < 50) {
     errors.push(`Mean effective depth d must be at least 50 mm (got ${d}).`);
   }
@@ -60,15 +59,14 @@ export function calculatePunchingShear(input) {
     errors.push(fyCheck.error);
   }
 
-  // Beta factor range validation
-  const betaCheck = Validate.punchingBeta(beta);
-  if (!betaCheck.valid) {
-    errors.push(betaCheck.error);
+  // Beta factor range validation for internal column
+  if (!Validate.isNumber(beta) || beta < 1.15 || beta > 2.5) {
+    errors.push(`Punching shear magnification factor beta (${beta}) must be in range [1.15, 2.50] for internal columns per EN 1992-1-1 Cl 6.4.3.`);
   }
 
-  // vRd,max factor validation
-  if (!Validate.isNumber(vrdmax_factor) || vrdmax_factor < 0.25 || vrdmax_factor > 0.60) {
-    errors.push(`vRd,max factor (${vrdmax_factor}) is outside practical National Annex range [0.25, 0.60] (default EN is 0.40, UK NA is 0.50).`);
+  // vRd,max factor validation (capped at 0.50 per published National Annexes e.g. UK NA)
+  if (!Validate.isNumber(vrdmax_factor) || vrdmax_factor < 0.25 || vrdmax_factor > 0.50) {
+    errors.push(`vRd,max factor (${vrdmax_factor}) is outside practical National Annex range [0.25, 0.50] (EN recommended is 0.40, UK NA is 0.50).`);
   }
 
   // Rebar ratio check (anti-silent-clamping)

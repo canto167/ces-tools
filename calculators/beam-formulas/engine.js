@@ -24,10 +24,30 @@ export function calculateBeam(params) {
   if (!Validate.isNumber(E) || E <= 0) errors.push(`Modulus of elasticity E must be greater than 0 MPa (got ${E}).`);
   if (!Validate.isNumber(I) || I <= 0) errors.push(`Second moment of area I must be greater than 0 mm⁴ (got ${I}).`);
 
-  // Guard load positions
+  // Guard load positions & magnitudes
   pointLoads.forEach((pl, idx) => {
+    if (!Validate.isNumber(pl.P)) {
+      errors.push(`Point load #${idx + 1} magnitude P must be a valid number.`);
+    }
     if (!Validate.isNumber(pl.a) || pl.a < 0 || pl.a > L) {
       errors.push(`Point load #${idx + 1} position a (${pl.a} m) is outside beam span [0, ${L}] m.`);
+    }
+  });
+
+  distributedLoads.forEach((dl, idx) => {
+    if (!Validate.isNumber(dl.w)) {
+      errors.push(`Distributed load #${idx + 1} magnitude w must be a valid number.`);
+    }
+    const x1 = dl.x1 !== undefined ? dl.x1 : 0;
+    const x2 = dl.x2 !== undefined ? dl.x2 : L;
+    if (!Validate.isNumber(x1) || x1 < 0 || x1 > L) {
+      errors.push(`Distributed load #${idx + 1} start position x1 (${x1} m) is outside span [0, ${L}] m.`);
+    }
+    if (!Validate.isNumber(x2) || x2 < 0 || x2 > L) {
+      errors.push(`Distributed load #${idx + 1} end position x2 (${x2} m) is outside span [0, ${L}] m.`);
+    }
+    if (x1 > x2) {
+      errors.push(`Distributed load #${idx + 1} start x1 (${x1} m) cannot exceed end x2 (${x2} m).`);
     }
   });
 
@@ -124,8 +144,9 @@ export function calculateBeam(params) {
     });
 
     // From statics with known end moments:
-    // RB * L + MA + MB - momentAboutA = 0
-    RB = (momentAboutA - MA - MB) / L;
+    // With MA negative (hogging at A) and MB positive (hogging at B in reaction convention):
+    // Sum moments about A: momentAboutA + MA + MB - RB * L = 0
+    RB = (momentAboutA + MA + MB) / L;
     RA = totalW - RB;
   } else if (supportType === 'propped_cantilever') {
     // Fixed at A (x=0), Prop at B (x=L)

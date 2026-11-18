@@ -65,6 +65,22 @@ describe('STRUCT-Agent & Codex Hardening — Negative & Boundary Guard Tests', (
       assert.strictEqual(res.ok, false);
       assert(res.errors.some(e => e.includes('Concrete strength')));
     });
+
+    test('Rejects unrecognized support condition', () => {
+      const res = calculateRcBeam({
+        b: 300, h: 500, cover: 30, M: 100, V: 50, L: 5, fck: 30, fyk: 500, support: 'fixed_encastre'
+      });
+      assert.strictEqual(res.ok, false);
+      assert(res.errors.some(e => e.includes('Invalid support condition')));
+    });
+
+    test('Rejects invalid link spacing or link legs', () => {
+      const res = calculateRcBeam({
+        b: 300, h: 500, cover: 30, M: 100, V: 50, L: 5, fck: 30, fyk: 500, link_spacing: 0
+      });
+      assert.strictEqual(res.ok, false);
+      assert(res.errors.some(e => e.includes('Link spacing')));
+    });
   });
 
   // C2 One-Way Slab Guards
@@ -76,16 +92,58 @@ describe('STRUCT-Agent & Codex Hardening — Negative & Boundary Guard Tests', (
       assert.strictEqual(res.ok, false);
       assert(res.errors.some(e => e.includes('overall depth h must be at least 75 mm')));
     });
+
+    test('Rejects unrecognized support condition', () => {
+      const res = calculateOneWaySlab({
+        L: 4.0, h: 150, cover: 20, main_bar_spacing: 150, fck: 30, fyk: 500, support: 'cantilever'
+      });
+      assert.strictEqual(res.ok, false);
+      assert(res.errors.some(e => e.includes('Invalid support condition')));
+    });
+
+    test('Over-reinforced slab fails Section Ductility check (BS 8110)', () => {
+      const res = calculateOneWaySlab({
+        code: 'BS8110', L: 6.0, h: 100, cover: 20, finishes: 5.0, qk: 25.0, main_bar_spacing: 100, fcu: 25, fy: 500
+      });
+      assert.strictEqual(res.ok, true);
+      const ductCheck = res.checks.find(c => c.name.includes('Section Ductility'));
+      assert(ductCheck !== undefined);
+      assert.strictEqual(ductCheck.status, 'FAIL');
+      assert(res.warnings.some(w => w.includes('over-reinforced')));
+    });
+
+    test('Over-reinforced slab fails Section Ductility check (EC2)', () => {
+      const res = calculateOneWaySlab({
+        code: 'EC2', L: 6.0, h: 100, cover: 20, finishes: 5.0, qk: 25.0, main_bar_spacing: 100, fck: 25, fyk: 500
+      });
+      assert.strictEqual(res.ok, true);
+      const ductCheck = res.checks.find(c => c.name.includes('Section Ductility'));
+      assert(ductCheck !== undefined);
+      assert.strictEqual(ductCheck.status, 'FAIL');
+      assert(res.warnings.some(w => w.includes('over-reinforced')));
+    });
   });
 
   // C3 Two-Way Slab Guards
   describe('C3 Two-Way Slab Guards', () => {
-    test('Warns when aspect ratio ly/lx > 2.0 (one-way spanning limit)', () => {
+    test('Warns and clamps to one-way limit when aspect ratio ly/lx > 2.0', () => {
       const res = calculateTwoWaySlab({
         lx: 3.0, ly: 7.5, h: 150, cover: 20, fcu: 30, fy: 500
       });
       assert.strictEqual(res.ok, true);
       assert(res.warnings.some(w => w.includes('Two-way action ceases')));
+      assert.strictEqual(res.results.alpha_sx, 0.125);
+      assert.strictEqual(res.results.alpha_sy, 0.0);
+    });
+
+    test('Over-reinforced two-way slab fails Short Span Section Ductility', () => {
+      const res = calculateTwoWaySlab({
+        lx: 6.0, ly: 6.0, h: 100, cover: 20, finishes: 5.0, qk: 25.0, fcu: 25, fy: 500
+      });
+      assert.strictEqual(res.ok, true);
+      const ductCheck = res.checks.find(c => c.name.includes('Short Span Section Ductility'));
+      assert(ductCheck !== undefined);
+      assert.strictEqual(ductCheck.status, 'FAIL');
     });
   });
 
@@ -99,12 +157,32 @@ describe('STRUCT-Agent & Codex Hardening — Negative & Boundary Guard Tests', (
       assert(res.errors.some(e => e.includes('Allowable bearing capacity')));
     });
 
+    test('Rejects zero bar spacing', () => {
+      const res = calculatePadFooting({
+        Gk: 500, Qk: 250, q_all: 200, B: 2.0, h: 500, col_c: 300, fcu: 30, fy: 500, bar_spacing: 0
+      });
+      assert.strictEqual(res.ok, false);
+      assert(res.errors.some(e => e.includes('Bar spacing')));
+    });
+
     test('Rejects column size exceeding footing dimension', () => {
       const res = calculatePadFooting({
         Gk: 500, Qk: 250, q_all: 200, B: 1.0, h: 500, col_c: 1200, fcu: 30, fy: 500
       });
       assert.strictEqual(res.ok, false);
       assert(res.errors.some(e => e.includes('Column size cannot exceed footing width')));
+    });
+
+    test('Over-reinforced footing fails Footing Flexure Ductility check', () => {
+      // Extremely high load on shallow footing: N = 1.4*3000 + 1.6*2000 = 7400kN, B=4m, h=250mm
+      const res = calculatePadFooting({
+        Gk: 3000, Qk: 2000, q_all: 500, B: 4.0, h: 250, col_c: 400, fcu: 25, fy: 500
+      });
+      assert.strictEqual(res.ok, true);
+      const ductCheck = res.checks.find(c => c.name.includes('Footing Flexure Ductility'));
+      assert(ductCheck !== undefined);
+      assert.strictEqual(ductCheck.status, 'FAIL');
+      assert(res.warnings.some(w => w.includes('over-reinforced')));
     });
   });
 
@@ -135,6 +213,31 @@ describe('STRUCT-Agent & Codex Hardening — Negative & Boundary Guard Tests', (
       });
       assert.strictEqual(res.ok, false);
       assert(res.errors.some(e => e.includes('friction angle phi')));
+    });
+
+    test('Rejects zero concrete unit weight or zero bar spacing', () => {
+      const res1 = calculateRetainingWall({
+        h_stem: 4.0, t_stem: 0.3, t_base: 0.4, b_toe: 0.8, b_heel: 2.0, gamma_conc: 0
+      });
+      assert.strictEqual(res1.ok, false);
+      assert(res1.errors.some(e => e.includes('gamma_conc')));
+
+      const res2 = calculateRetainingWall({
+        h_stem: 4.0, t_stem: 0.3, t_base: 0.4, b_toe: 0.8, b_heel: 2.0, barSpacing: 0
+      });
+      assert.strictEqual(res2.ok, false);
+      assert(res2.errors.some(e => e.includes('Vertical bar spacing')));
+    });
+
+    test('Over-reinforced stem triggers FAIL check and warning', () => {
+      // Very high wall with thin stem: h_stem = 6.0m, t_stem = 0.20m
+      const res = calculateRetainingWall({
+        h_stem: 6.0, t_stem: 0.20, t_base: 0.5, b_toe: 1.0, b_heel: 3.5, fcu: 25, fy: 500
+      });
+      assert.strictEqual(res.ok, true);
+      assert.strictEqual(res.pass_K, false);
+      assert.strictEqual(res.status, 'FAIL');
+      assert(res.warnings.some(w => w.includes('over-reinforced')));
     });
   });
 

@@ -14,40 +14,40 @@ export function calculateRcBeam(input) {
   const report = new CalculationReport();
   const results = {};
 
-  const code = (input.code || 'EC2').toUpperCase();
-  const b = Number(input.b);
-  const h = Number(input.h);
-  const cover = Number(input.cover);
-  const M = Number(input.M); // kNm
-  const V = Number(input.V); // kN
-  const L = Number(input.L); // m
-  const support = input.support || 'simply_supported';
-  const agg = Number(input.agg || 20);
+  const code = ((input && input.code) || 'EC2').toUpperCase();
+  const b = Number(input && input.b);
+  const h = Number(input && input.h);
+  const cover = Number(input && input.cover);
+  const M = Number(input && input.M); // kNm
+  const V = Number(input && input.V); // kN
+  const L = Number(input && input.L); // m
+  const support = input && input.support !== undefined ? input.support : 'simply_supported';
+  const agg = input && input.agg !== undefined ? Number(input.agg) : 20;
 
-  const link_dia = Number(input.link_dia || 10);
-  const link_legs = Number(input.link_legs || 2);
-  const link_spacing = Number(input.link_spacing || 150);
+  const link_dia = input && input.link_dia !== undefined ? Number(input.link_dia) : 10;
+  const link_legs = input && input.link_legs !== undefined ? Number(input.link_legs) : 2;
+  const link_spacing = input && input.link_spacing !== undefined ? Number(input.link_spacing) : 150;
 
-  const top_bars_n = Number(input.top_bars_n || 2);
-  const top_bars_dia = Number(input.top_bars_dia || 16);
+  const top_bars_n = input && input.top_bars_n !== undefined ? Number(input.top_bars_n) : 2;
+  const top_bars_dia = input && input.top_bars_dia !== undefined ? Number(input.top_bars_dia) : 16;
 
   // Parse tension bars: support single layer or multiple layers
-  let tensionLayers = input.tension_layers;
+  let tensionLayers = input && input.tension_layers;
   if (!tensionLayers || !tensionLayers.length) {
     tensionLayers = [{
-      n: Number(input.bars_n || 4),
-      dia: Number(input.bars_dia || 20)
+      n: input && input.bars_n !== undefined ? Number(input.bars_n) : 4,
+      dia: input && input.bars_dia !== undefined ? Number(input.bars_dia) : 20
     }];
   }
 
   // Material properties based on code
-  const fck = Number(input.fck || input.fcu || 30);
+  const fck = input && input.fck !== undefined ? Number(input.fck) : (input && input.fcu !== undefined ? Number(input.fcu) : 30);
   const fcu = fck;
-  const fyk = Number(input.fyk || input.fy || 500);
+  const fyk = input && input.fyk !== undefined ? Number(input.fyk) : (input && input.fy !== undefined ? Number(input.fy) : 500);
   const fy = fyk;
-  const fywk = Number(input.fywk || input.fyv || 500);
+  const fywk = input && input.fywk !== undefined ? Number(input.fywk) : (input && input.fyv !== undefined ? Number(input.fyv) : 500);
   const fyv = fywk;
-  const acc = Number(input.acc || 1.0); // National Annex parameter for EC2
+  const acc = input && input.acc !== undefined ? Number(input.acc) : 1.0; // National Annex parameter for EC2
 
   // Validation
   if (!Validate.isNumber(b) || b < 100) errors.push(`Beam width b must be at least 100 mm (got ${b}).`);
@@ -57,6 +57,17 @@ export function calculateRcBeam(input) {
   if (M === undefined || !Validate.isNumber(M) || M < 0) errors.push('Design moment M must be 0 or positive.');
   if (V === undefined || !Validate.isNumber(V) || V < 0) errors.push('Design shear V must be 0 or positive.');
   if (!Validate.isNumber(L) || L <= 0) errors.push('Span length L must be greater than 0.');
+
+  const validSupports = ['simply_supported', 'end_span', 'interior_span', 'cantilever'];
+  if (!validSupports.includes(support)) {
+    errors.push(`Invalid support condition "${support}". Supported types: ${validSupports.join(', ')}.`);
+  }
+
+  if (!Validate.isNumber(link_dia) || link_dia <= 0) errors.push('Link diameter must be greater than 0.');
+  if (!Validate.isNumber(link_legs) || link_legs < 2) errors.push('Link legs must be at least 2.');
+  if (!Validate.isNumber(link_spacing) || link_spacing <= 0) errors.push('Link spacing must be greater than 0.');
+  if (!Validate.isNumber(top_bars_n) || top_bars_n < 0) errors.push('Top bars count must be 0 or positive.');
+  if (!Validate.isNumber(top_bars_dia) || top_bars_dia <= 0) errors.push('Top bar diameter must be greater than 0.');
 
   const concCheck = Validate.concreteStrength(fck, code);
   if (!concCheck.valid) {

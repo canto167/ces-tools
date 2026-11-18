@@ -7,24 +7,23 @@ import { CalculationReport } from '../../shared/js/core/report.js';
 import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateRetainingWall(params) {
-  const {
-    h_stem = 4.0,       // Stem height (m)
-    t_stem = 0.3,       // Stem thickness (m)
-    t_base = 0.4,       // Base thickness (m)
-    b_toe = 0.8,        // Toe projection (m)
-    b_heel = 2.4,       // Heel projection (m)
-    gamma_soil = 18.0,  // Soil unit weight (kN/m3)
-    phi = 30.0,         // Angle of internal friction (deg)
-    q_surcharge = 10.0, // Surcharge pressure (kN/m2)
-    mu = 0.5,           // Base-soil coefficient of friction
-    gamma_conc = 24.0,  // Concrete unit weight (kN/m3)
-    q_all = 150.0,      // Allowable soil bearing capacity (kN/m2)
-    cover = 40,         // Nominal cover to stem vertical bars (mm)
-    barDia = 16,        // Vertical bar diameter (mm)
-    barSpacing = 150,   // Vertical bar spacing (mm c/c)
-    fcu = 30,           // Concrete cube strength (MPa)
-    fy = 500            // Reinforcement yield strength (MPa)
-  } = params;
+  const p = params || {};
+  const h_stem = p.h_stem !== undefined ? Number(p.h_stem) : 4.0;       // Stem height (m)
+  const t_stem = p.t_stem !== undefined ? Number(p.t_stem) : 0.3;       // Stem thickness (m)
+  const t_base = p.t_base !== undefined ? Number(p.t_base) : 0.4;       // Base thickness (m)
+  const b_toe = p.b_toe !== undefined ? Number(p.b_toe) : 0.8;         // Toe projection (m)
+  const b_heel = p.b_heel !== undefined ? Number(p.b_heel) : 2.4;       // Heel projection (m)
+  const gamma_soil = p.gamma_soil !== undefined ? Number(p.gamma_soil) : 18.0;  // Soil unit weight (kN/m3)
+  const phi = p.phi !== undefined ? Number(p.phi) : 30.0;          // Angle of internal friction (deg)
+  const q_surcharge = p.q_surcharge !== undefined ? Number(p.q_surcharge) : 10.0; // Surcharge pressure (kN/m2)
+  const mu = p.mu !== undefined ? Number(p.mu) : 0.5;            // Base-soil coefficient of friction
+  const gamma_conc = p.gamma_conc !== undefined ? Number(p.gamma_conc) : 24.0;  // Concrete unit weight (kN/m3)
+  const q_all = p.q_all !== undefined ? Number(p.q_all) : 150.0;       // Allowable soil bearing capacity (kN/m2)
+  const cover = p.cover !== undefined ? Number(p.cover) : 40;          // Nominal cover to stem vertical bars (mm)
+  const barDia = p.barDia !== undefined ? Number(p.barDia) : 16;        // Vertical bar diameter (mm)
+  const barSpacing = p.barSpacing !== undefined ? Number(p.barSpacing) : 150;   // Vertical bar spacing (mm c/c)
+  const fcu = p.fcu !== undefined ? Number(p.fcu) : 30;            // Concrete cube strength (MPa)
+  const fy = p.fy !== undefined ? Number(p.fy) : 500;             // Reinforcement yield strength (MPa)
 
   const errors = [];
   const warnings = [];
@@ -48,6 +47,18 @@ export function calculateRetainingWall(params) {
   if (!Validate.isNumber(q_all) || q_all <= 0) {
     errors.push(`Allowable soil bearing capacity q_all must be greater than 0.`);
   }
+  if (!Validate.isNumber(gamma_conc) || gamma_conc <= 0) {
+    errors.push(`Concrete unit weight gamma_conc must be greater than 0.`);
+  }
+  if (!Validate.isNumber(barSpacing) || barSpacing <= 0) {
+    errors.push(`Vertical bar spacing must be greater than 0.`);
+  }
+  if (!Validate.isNumber(barDia) || barDia <= 0) {
+    errors.push(`Vertical bar diameter must be greater than 0.`);
+  }
+  if (!Validate.isNumber(q_surcharge) || q_surcharge < 0) {
+    errors.push(`Surcharge pressure q_surcharge must be 0 or positive.`);
+  }
 
   const concCheck = Validate.concreteStrength(fcu, 'BS8110');
   if (!concCheck.valid) errors.push(concCheck.error);
@@ -59,6 +70,7 @@ export function calculateRetainingWall(params) {
   if (!coverCheck.valid) errors.push(coverCheck.error);
 
   warnings.push('Scope: Cantilever RC retaining wall with dry granular cohesive-less backfill (Rankine theory, horizontal backfill). Hydrostatic groundwater pressure, sloping backfill, seismic forces, and deep global slip-circle slope stability excluded.');
+  warnings.push('Scope Limitation: Verification applies to overall wall stability and stem section only. Heel and toe base slab flexure and shear design are excluded and must be designed separately.');
 
   const report = new CalculationReport({
     title: 'Cantilever Retaining Wall Stability & Stem Design',
@@ -161,6 +173,12 @@ export function calculateRetainingWall(params) {
   const d_stem = t_stem * 1000 - cover - barDia / 2; // Effective depth (mm)
 
   const K_stem = (Mu * 1e6) / (b_strip * Math.pow(d_stem, 2) * fcu);
+  const K_prime = 0.156;
+  const pass_K = K_stem <= K_prime;
+  if (!pass_K) {
+    warnings.push(`Stem section is over-reinforced (K = ${K_stem.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs; stem thickness t_stem must be increased.`);
+  }
+
   const z_stem = Math.min(
     0.95 * d_stem,
     d_stem * (0.5 + Math.sqrt(Math.max(0, 0.25 - K_stem / 0.9)))
@@ -172,7 +190,7 @@ export function calculateRetainingWall(params) {
 
   const singleBarArea = (Math.PI * barDia * barDia) / 4;
   const As_prov = (1000 / barSpacing) * singleBarArea; // mm2/m
-  const pass_steel = As_prov >= As_gov_req;
+  const pass_steel = pass_K && As_prov >= As_gov_req;
 
   // Shear stress at stem base
   const v_stem = (Vu * 1000) / (b_strip * d_stem); // N/mm2
@@ -184,7 +202,7 @@ export function calculateRetainingWall(params) {
   const vc_stem = (0.79 / 1.25) * Math.pow(p100, 1 / 3) * depthFactor * Math.pow(fcu_shear / 25, 1 / 3);
   const pass_shear = v_stem <= vc_stem;
 
-  const overallPass = pass_OT && pass_slide && pass_kern && pass_bearing && pass_steel && pass_shear;
+  const overallPass = pass_OT && pass_slide && pass_kern && pass_bearing && pass_steel && pass_shear && pass_K;
 
   // Add steps to report
   report.addStep({
@@ -249,6 +267,19 @@ export function calculateRetainingWall(params) {
   });
 
   report.addCheck({
+    title: "Stem Section Ductility (K <= K')",
+    ratio: K_stem / K_prime,
+    allowable: K_prime,
+    actual: K_stem,
+    unit: 'ratio',
+    pass: pass_K,
+    clause: 'BS 8110-1:1997 Cl 3.4.4.4',
+    message: pass_K
+      ? `K = ${K_stem.toFixed(4)} <= K' = ${K_prime} (singly reinforced stem valid)`
+      : `Stem section is over-reinforced (K = ${K_stem.toFixed(4)} > K' = ${K_prime}). Concrete crushing governs. Stem thickness t_stem must be increased.`
+  });
+
+  report.addCheck({
     title: 'Stem Flexural Reinforcement',
     ratio: As_gov_req / As_prov,
     allowable: As_prov,
@@ -304,6 +335,8 @@ export function calculateRetainingWall(params) {
     pass_bearing,
     pass_steel,
     pass_shear,
+    pass_K,
+    status_text: overallPass ? 'PASS (Stability & Stem Only - Base Slab Excluded)' : 'FAIL',
     status: overallPass ? 'PASS' : 'FAIL',
     ok: errors.length === 0,
     errors,
