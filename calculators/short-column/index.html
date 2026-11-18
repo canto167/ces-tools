@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Short Braced Column Designer (BS 8110) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Reinforced Concrete Column Calculation</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-COL-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> Short Braced Column (Axial Compression)</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Code:</strong> BS 8110-1:1997 Section 3.8.4.3 (Eq 38)</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Short Braced Column Designer</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">BS 8110-1:1997 Axial Compression, Slenderness, & Links</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div id="errorAlert" class="card" style="display: none; border-left: 4px solid var(--accent-amber); background: rgba(245, 158, 11, 0.08);"></div>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Column Geometry & End Conditions</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="b">Width, b <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="b" class="form-input" value="300" min="150" max="1500" step="25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="h">Depth, h <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="h" class="form-input" value="300" min="150" max="1500" step="25">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="l0">Clear Height, l₀ <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="l0" class="form-input" value="3.2" min="1.0" max="15.0" step="0.1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cover">Nominal Cover <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="cover" class="form-input" value="30" min="20" max="75" step="5">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="topEnd">Top End Condition</label>
+              <select id="topEnd" class="form-select">
+                <option value="1">Condition 1 (Fully restrained)</option>
+                <option value="2">Condition 2 (Partially restrained)</option>
+                <option value="3">Condition 3 (Nominally restrained)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bottomEnd">Bottom End Condition</label>
+              <select id="bottomEnd" class="form-select">
+                <option value="1">Condition 1 (Fully restrained)</option>
+                <option value="2">Condition 2 (Partially restrained)</option>
+                <option value="3">Condition 3 (Nominally restrained)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Axial Loading & Materials</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="N">Design Axial Load, N <span class="unit">(kN)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="N" class="form-input" value="1500" min="50" max="25000" step="50">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="k">Stress Factor, k</label>
+              <select id="k" class="form-select">
+                <option value="0.70">0.70 (γm = 1.15 standard)</option>
+                <option value="0.75">0.75 (γm = 1.05 original)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fcu">Concrete Grade, fcu <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fcu" class="form-input" value="30" min="25" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fy">Rebar Yield, fy <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fy" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Longitudinal Reinforcement</div>
+          <div class="form-group">
+            <label class="form-label">Number of Longitudinal Bars</label>
+            <div id="barCount_group"></div>
+          </div>
+          <div class="form-group" style="margin-top: 12px;">
+            <label class="form-label">Bar Diameter (mm)</label>
+            <div id="barDiam_group"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Cross-Section Detailing & Applied Load</div>
+          <div class="svg-canvas-container">
+            <svg id="columnSVG" width="380" height="320"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Design Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Equation</th>
+                    <th>Substitution / Values</th>
+                    <th>Clause Ref</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Short Braced Column Designer v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and preliminary design verification. Slender columns and columns subject to moments must be designed to BS 8110 Cl 3.8.3 / Cl 3.8.4.5 and certified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initShortColumnUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initShortColumnUI();
+    });
+  </script>
+</body>
+</html>

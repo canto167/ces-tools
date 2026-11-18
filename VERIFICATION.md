@@ -125,3 +125,13 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C5 pad-footing** | BS-1 | v_punch (N/mm²) | 0.185 | 0.185 | 0.00% | 🟢 PASS |
 | **C5 pad-footing** | BS-1 | Vbeam (kN) | 401.5 | 401.49 | 0.00% | 🟢 PASS |
 | **C5 pad-footing** | BS-1 | v_beam (N/mm²) | 0.278 | 0.278 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | beta | 0.75 | 0.75 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | le (m) | 2.40 | 2.40 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | le/h | 8.0 | 8.0 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | Asc,req (mm²) | 1200.0 | 1200.00 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | Asc,prov (mm²) | 1256.6 | 1256.64 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | capacity (kN) | 1519.8 | 1519.82 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | Nuz (kN) | 1761.6 | 1761.64 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | link phi (mm) | 6 | 6 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 | link spacing (mm) | 240 | 240 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 (k=0.75) | Asc,req (mm²) | 1120.0 | 1120.00 | 0.00% | 🟢 PASS |
