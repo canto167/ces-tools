@@ -151,3 +151,26 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C7 anchorage-lap** | BS-1 | lap x1.4 (mm) | 889.5 | 889.50 | 0.00% | 🟢 PASS |
 | **C7 anchorage-lap** | BS-1 | lap x2.0 (mm) | 1270.7 | 1270.72 | 0.00% | 🟢 PASS |
 | **C7 anchorage-lap** | BS-1 | lap min (mm) | 300.0 | 300.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 1 (SS UDL) | RA (kN) | 30.0 | 30.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 1 (SS UDL) | RB (kN) | 30.0 | 30.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 1 (SS UDL) | Mmax (kNm) | 45.0 | 45.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 1 (SS UDL) | delta_max (mm) | 8.4375 | 8.4375 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 2a (SS P) | RA (kN) | 26.667 | 26.667 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 2a (SS P) | RB (kN) | 13.333 | 13.333 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 2a (SS P) | Mmax (kNm) | 53.333 | 53.333 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 2b (Central P) | delta_mid (mm) | 9.000 | 9.000 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 3 (SS UDL+P) | RA (kN) | 32.5 | 32.50 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 3 (SS UDL+P) | RB (kN) | 27.5 | 27.50 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 3 (SS UDL+P) | Mmax (kNm) | 75.0 | 75.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 3 (SS UDL+P) | M at 4m (kNm) | 70.0 | 70.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 4 (Cantilever) | V (kN) | 34.0 | 34.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 4 (Cantilever) | M (kNm) | -66.0 | -66.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 4 (Cantilever) | delta_tip (mm) | 4.05 | 4.050 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 5 (Fixed-Fixed)| Msupport (kNm) | -30.0 | -30.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 5 (Fixed-Fixed)| Mmid (kNm) | 15.0 | 15.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 5 (Fixed-Fixed)| delta_mid (mm) | 1.6875 | 1.6875 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 6 (Propped Cant)| RB (kN) | 22.5 | 22.50 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 6 (Propped Cant)| RA (kN) | 37.5 | 37.50 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 6 (Propped Cant)| MA (kNm) | -45.0 | -45.00 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 6 (Propped Cant)| Msag,max (kNm) | 25.3125 | 25.3125 | 0.00% | 🟢 PASS |
+| **C8 beam-formulas** | Test 6 (Propped Cant)| delta_max (mm) | 3.51 | 3.503 | 0.20% | 🟢 PASS |

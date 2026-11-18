@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beam Formulas, SFD, BMD & Deflection Calculator — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+  <style>
+    .diag-tab-btn {
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .diag-tab-btn.active {
+      background: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+    }
+    .diag-tab-pane {
+      display: none;
+    }
+    .diag-tab-pane.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Elastic Beam Analysis & Internal Actions</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-BEAM-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> Prismatic Beam (SFD, BMD, Deflection)</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Analysis Method:</strong> Euler-Bernoulli Elastic Flexure with Superposition</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Beam Formulas, SFD, BMD & Deflection</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Reactions, Shear, Bending Moment, & Elastic Curves for 4 Support Types</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Span & Support Boundary Conditions</div>
+          <div class="form-group">
+            <label class="form-label" for="supportType">Support Configuration</label>
+            <select id="supportType" class="form-select">
+              <option value="simply_supported">Simply Supported (Pin - Roller)</option>
+              <option value="cantilever">Cantilever (Fixed at Left End, Free at Right)</option>
+              <option value="fixed_fixed">Fixed–Fixed (Clamped Both Ends)</option>
+              <option value="propped_cantilever">Propped Cantilever (Fixed Left, Prop Right)</option>
+            </select>
+          </div>
+
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label" for="L">Span Length, L <span class="unit">(m)</span></label>
+            <div class="input-with-stepper">
+              <input type="number" id="L" class="form-input" value="6.0" min="0.5" max="50" step="0.5">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Applied Loading</div>
+          <div style="font-weight: 600; font-size: 13px; margin-bottom: 8px; color: var(--text-main);">1. Uniformly Distributed Load (UDL)</div>
+          <div class="form-group">
+            <label class="form-label" for="w">UDL Magnitude, w <span class="unit">(kN/m)</span></label>
+            <div class="input-with-stepper">
+              <input type="number" id="w" class="form-input" value="10.0" min="0" max="500" step="1">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+            <div class="form-group">
+              <label class="form-label" for="x1">Start, x₁ <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="x1" class="form-input" value="0.0" min="0" max="50" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="x2">End, x₂ <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="x2" class="form-input" value="6.0" min="0" max="50" step="0.5">
+              </div>
+            </div>
+          </div>
+
+          <div style="font-weight: 600; font-size: 13px; margin-top: 16px; margin-bottom: 8px; color: var(--text-main);">2. Point Load</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="P">Point Force, P <span class="unit">(kN)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="P" class="form-input" value="0.0" min="0" max="2000" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="a">Position, a <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="a" class="form-input" value="3.0" min="0" max="50" step="0.5">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Flexural Rigidity (EI)</div>
+          <div class="form-group">
+            <label class="form-label" for="matPreset">Material Preset</label>
+            <select id="matPreset" class="form-select">
+              <option value="steel">Structural Steel (E = 200,000 MPa)</option>
+              <option value="concrete">Reinforced Concrete (E ≈ 33,000 MPa)</option>
+              <option value="timber">Structural Timber (E ≈ 11,000 MPa)</option>
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 8px;">
+            <div class="form-group">
+              <label class="form-label" for="E">Modulus, E <span class="unit">(MPa)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="E" class="form-input" value="200000" min="1000" max="500000" step="5000">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="I_cm4">Inertia, I <span class="unit">(cm⁴)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="I_cm4" class="form-input" value="10000" min="10" max="1000000" step="500">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div class="card-title" style="margin-bottom: 0;">Interactive Analysis Diagrams</div>
+            <div style="display: flex; gap: 6px;">
+              <button type="button" class="diag-tab-btn active" data-target="paneModel">Model</button>
+              <button type="button" class="diag-tab-btn" data-target="paneSFD">SFD</button>
+              <button type="button" class="diag-tab-btn" data-target="paneBMD">BMD</button>
+              <button type="button" class="diag-tab-btn" data-target="paneDefl">Deflection</button>
+            </div>
+          </div>
+
+          <div id="paneModel" class="diag-tab-pane active">
+            <div class="svg-canvas-container">
+              <svg id="modelSVG" width="440" height="180"></svg>
+            </div>
+          </div>
+
+          <div id="paneSFD" class="diag-tab-pane">
+            <div class="svg-canvas-container">
+              <svg id="sfdSVG" width="440" height="200"></svg>
+            </div>
+          </div>
+
+          <div id="paneBMD" class="diag-tab-pane">
+            <div class="svg-canvas-container">
+              <svg id="bmdSVG" width="440" height="200"></svg>
+            </div>
+          </div>
+
+          <div id="paneDefl" class="diag-tab-pane">
+            <div class="svg-canvas-container">
+              <svg id="deflSVG" width="440" height="200"></svg>
+            </div>
+          </div>
+
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSteps">Calculation Summary</button>
+          </div>
+
+          <div id="tabSteps" class="tab-pane active">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Analytical Formula</th>
+                    <th>Evaluated Values</th>
+                    <th>Theory Reference</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Beam Formulas & Diagrams v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and preliminary design verification. Boundary restraint stiffness and elastic properties must be verified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initBeamFormulasUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initBeamFormulasUI();
+    });
+  </script>
+</body>
+</html>

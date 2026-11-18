@@ -25,8 +25,8 @@
 - [x] **C5: Square Pad Footing** (`pad-footing`) — BS 8110 🟢 (1/1 Tests Pass; 4 Screenshots)
 - [x] **C6: Short Braced Column (Axial)** (`short-column`) — BS 8110 🟢 (4/4 Tests Pass; 4 Screenshots)
 - [x] **C7: Anchorage & Lap Length** (`anchorage-lap`) — EC2 & BS 8110 🟢 (4/4 Tests Pass; 4 Screenshots)
-- [ ] **C8: Beam Formulas (SFD, BMD, Deflection)** (`beam-formulas`) — 4 Support Types 🟡
-- [ ] **C9: Rebar Weight & Quantity List** (`rebar-weight`) ⚪
+- [x] **C8: Beam Formulas (SFD, BMD, Deflection)** (`beam-formulas`) — 4 Support Types 🟢 (8/8 Tests Pass; 4 Screenshots)
+- [ ] **C9: Rebar Weight & Quantity List** (`rebar-weight`) 🟡
 - [ ] **C10: Cantilever Retaining Wall** (`retaining-wall`) — Stability + BS 8110 Stem ⚪
 - [ ] **C11: Engineering Unit Converter** (`unit-converter`) — SI & US ⚪
 
