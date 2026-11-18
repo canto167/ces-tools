@@ -29,6 +29,7 @@
 - [x] **C9: Rebar Weight & Quantity List** (`rebar-weight`) 🟢 (4/4 Tests Pass; 4 Screenshots)
 - [x] **C10: Cantilever Retaining Wall** (`retaining-wall`) — Stability + BS 8110 Stem 🟢 (3/3 Tests Pass; 4 Screenshots)
 - [x] **C11: Engineering Unit Converter** (`unit-converter`) — SI & US 🟢 (8/8 Tests Pass; 4 Screenshots)
+- [x] **Hardening Pass (STRUCT-Agent & Codex Hardening)** 🟢 (61/61 Total Tests Pass; Statutory Invariants & Negative Guard Tests)
 
 ---
 
