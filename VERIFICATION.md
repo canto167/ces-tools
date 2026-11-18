@@ -182,3 +182,29 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C9 rebar-weight** | phi20 | Rule kg/m | 2.469 | 2.469 | 0.01% | 🟢 PASS |
 | **C9 rebar-weight** | Row Test | Total Length (m) | 240.0 | 240.00 | 0.00% | 🟢 PASS |
 | **C9 rebar-weight** | Row Test | Total Weight (kg)| 378.8 | 378.80 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Ka | 0.3333 | 0.3333 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Pa (kN/m) | 58.08 | 58.08 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Pq (kN/m) | 14.67 | 14.67 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Mo (kNm/m) | 117.45 | 117.45 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | W_stem (kN/m) | 28.8 | 28.80 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | W_base (kN/m) | 33.6 | 33.60 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | W_soil (kN/m) | 172.8 | 172.80 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | W_tot (kN/m) | 235.2 | 235.20 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Mr (kNm/m) | 483.6 | 483.60 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | FoS Overturning | 4.12 | 4.12 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | FoS Sliding | 1.62 | 1.62 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | V_bear (kN/m) | 259.2 | 259.20 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | e (m) | 0.124 | 0.124 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | pmax (kPa) | 89.9 | 89.85 | 0.05% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | pmin (kPa) | 58.3 | 58.26 | 0.07% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem Mu (kNm/m) | 132.3 | 132.27 | 0.02% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem d (mm) | 252.0 | 252.00 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem As,req (mm²/m) | 1317.6 | 1317.59 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem As,prov (mm²/m) | 1340.4 | 1340.41 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem Vu (kN/m) | 88.5 | 88.53 | 0.03% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem v (N/mm²) | 0.351 | 0.351 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test A | Stem vc (N/mm²) | 0.611 | 0.611 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test B | W_tot (kN/m) | 194.4 | 194.40 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test B | Mr (kNm/m) | 351.0 | 351.00 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test B | FoS Overturning | 2.99 | 2.99 | 0.00% | 🟢 PASS |
+| **C10 retaining-wall** | Test B | FoS Sliding | 1.34 | 1.34 | 0.00% | 🟢 PASS (FAIL verified) |

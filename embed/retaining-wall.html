@@ -1,0 +1,42 @@
+<!--
+  Civil Engineer Society (CES) - Responsive Blogger Embed Snippet
+  Tool: Cantilever Retaining Wall Designer (Stability & BS 8110 Stem)
+  Instructions: Copy and paste this HTML snippet directly into Blogger Post/Page (HTML View).
+-->
+
+<div class="ces-embed-wrapper" style="width: 100%; max-width: 1100px; margin: 20px auto; font-family: ui-sans-serif, system-ui, sans-serif;">
+  <p style="font-size: 14px; color: #475569; margin-bottom: 12px; line-height: 1.5;">
+    Design and check reinforced concrete cantilever retaining walls for overturning stability, sliding, middle-third kern eccentricity, soil bearing capacity, and BS 8110-1:1997 stem flexure and shear reinforcement.
+  </p>
+
+  <iframe
+    id="ces-iframe-retaining-wall"
+    src="https://REPLACE-ME.github.io/ces-tools/calculators/retaining-wall/"
+    style="width: 100%; height: 980px; border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);"
+    loading="lazy"
+    scrolling="no"
+    title="Cantilever Retaining Wall Designer — Civil Engineer Society"
+  ></iframe>
+
+  <noscript>
+    <div style="padding: 16px; background: #eff6ff; border: 1px solid #2563eb; border-radius: 6px; margin-top: 10px;">
+      <p style="margin: 0; color: #1e3a8a; font-size: 13px;">
+        JavaScript is required to run the interactive calculator. Please visit the standalone version at:
+        <a href="https://REPLACE-ME.github.io/ces-tools/calculators/retaining-wall/" target="_blank" rel="noopener" style="color: #2563eb; font-weight: bold;">
+          Open Standalone Retaining Wall Calculator
+        </a>
+      </p>
+    </div>
+  </noscript>
+
+  <script>
+    window.addEventListener('message', function(e) {
+      if (e.data && e.data.type === 'ces-tool-resize' && e.data.slug === 'retaining-wall') {
+        var iframe = document.getElementById('ces-iframe-retaining-wall');
+        if (iframe && e.data.height) {
+          iframe.style.height = (e.data.height + 20) + 'px';
+        }
+      }
+    });
+  </script>
+</div>

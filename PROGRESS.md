@@ -27,8 +27,8 @@
 - [x] **C7: Anchorage & Lap Length** (`anchorage-lap`) — EC2 & BS 8110 🟢 (4/4 Tests Pass; 4 Screenshots)
 - [x] **C8: Beam Formulas (SFD, BMD, Deflection)** (`beam-formulas`) — 4 Support Types 🟢 (8/8 Tests Pass; 4 Screenshots)
 - [x] **C9: Rebar Weight & Quantity List** (`rebar-weight`) 🟢 (4/4 Tests Pass; 4 Screenshots)
-- [ ] **C10: Cantilever Retaining Wall** (`retaining-wall`) — Stability + BS 8110 Stem 🟡
-- [ ] **C11: Engineering Unit Converter** (`unit-converter`) — SI & US ⚪
+- [x] **C10: Cantilever Retaining Wall** (`retaining-wall`) — Stability + BS 8110 Stem 🟢 (3/3 Tests Pass; 4 Screenshots)
+- [ ] **C11: Engineering Unit Converter** (`unit-converter`) — SI & US 🟡
 
 ---
 

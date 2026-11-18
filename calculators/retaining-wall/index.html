@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cantilever Retaining Wall Designer (Stability & BS 8110) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Earth Retaining Structure Calculation</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-WALL-01</td>
+      </tr>
+      <tr>
+        <td><strong>Structure:</strong> Cantilever RC Retaining Wall</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Standards:</strong> Rankine Active Theory & BS 8110-1:1997 Stem Design</td>
+        <td><strong>Engineer:</strong> Qualified Geotechnical / Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Cantilever Retaining Wall Designer</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Global Stability (Overturning, Sliding, Bearing) & BS 8110 Stem Reinforcement</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example (Test A)</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Retaining Wall Dimensions</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="h_stem">Stem Height, hstem <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="h_stem" class="form-input" value="4.0" min="1.0" max="15.0" step="0.2">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="t_stem">Stem Thickness, tstem <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="t_stem" class="form-input" value="0.3" min="0.2" max="1.5" step="0.05">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="t_base">Base Thick <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="t_base" class="form-input" value="0.4" min="0.2" max="2.0" step="0.05">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="b_toe">Toe Width <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="b_toe" class="form-input" value="0.8" min="0.2" max="5.0" step="0.1">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="b_heel">Heel Width <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="b_heel" class="form-input" value="2.4" min="0.5" max="8.0" step="0.1">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Geotechnical Soil & Surcharge Parameters</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="gamma_soil">Soil Density, γ <span class="unit">(kN/m³)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="gamma_soil" class="form-input" value="18.0" min="14" max="24" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="phi">Friction Angle, φ' <span class="unit">(deg)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="phi" class="form-input" value="30.0" min="20" max="45" step="1">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="q_surcharge">Surcharge, q <span class="unit">(kPa)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="q_surcharge" class="form-input" value="10.0" min="0" max="100" step="2">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="mu">Friction Coeff, μ</label>
+              <div class="input-with-stepper">
+                <input type="number" id="mu" class="form-input" value="0.50" min="0.2" max="0.8" step="0.05">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="q_all">Allowable Bearing, qall <span class="unit">(kPa)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="q_all" class="form-input" value="150" min="50" max="600" step="10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="gamma_conc">Concrete Unit Wt <span class="unit">(kN/m³)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="gamma_conc" class="form-input" value="24" min="23" max="26" step="0.5">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Stem Reinforcement & Materials</div>
+          <div class="form-group">
+            <label class="form-label">Vertical Tension Bar Size</label>
+            <div id="barDia_group"></div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="barSpacing">Bar Spacing <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="barSpacing" class="form-input" value="150" min="75" max="300" step="25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cover">Nominal Cover <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="cover" class="form-input" value="40" min="25" max="75" step="5">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fcu">Concrete Grade, fcu <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fcu" class="form-input" value="30" min="25" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fy">Steel Yield, fy <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fy" class="form-input" value="500" min="400" max="600" step="50">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Cross-Section Elevation & Pressure Distribution</div>
+          <div class="svg-canvas-container">
+            <svg id="wallSVG" width="440" height="340"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Design Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Design Check / Step</th>
+                    <th>Governing Formula</th>
+                    <th>Substituted Values</th>
+                    <th>Code / Theory Reference</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Cantilever Retaining Wall Designer v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and preliminary design verification. Ground investigation, water table variations, toe passive resistance, and heel/toe structural bending must be verified and certified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initRetainingWallUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initRetainingWallUI();
+    });
+  </script>
+</body>
+</html>
