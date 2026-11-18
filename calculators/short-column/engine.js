@@ -5,6 +5,7 @@
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 // Table 3.19: β values for braced columns
 // Rows: Top end condition 1, 2, 3
@@ -37,11 +38,35 @@ export function calculateShortColumn(params) {
     barDiam = 20        // Diameter of longitudinal bars (mm)
   } = params;
 
+  const errors = [];
+  const warnings = [];
+
+  // 1. Input Guards (STRUCT-Agent & Codex Hardening)
+  if (!Validate.isNumber(b) || b < 150) errors.push(`Column width b must be at least 150 mm (got ${b}).`);
+  if (!Validate.isNumber(h) || h < 150) errors.push(`Column depth h must be at least 150 mm (got ${h}).`);
+  if (!Validate.isNumber(l0) || l0 <= 0) errors.push(`Clear column height l0 must be greater than 0 m (got ${l0}).`);
+  if (!Validate.isNumber(N) || N <= 0) errors.push(`Design ultimate axial load N must be greater than 0 kN (got ${N}).`);
+
+  const coverCheck = Validate.coverSanity(cover, b, h);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+
+  const concCheck = Validate.concreteStrength(fcu, 'BS8110');
+  if (!concCheck.valid) errors.push(concCheck.error);
+
+  const steelCheck = Validate.steelStrength(fy, 'Column steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
+
+  warnings.push('Scope: Short braced axial column checker (BS 8110 Cl 3.8.4.3). Predominantly axial loading with nominal eccentricity (e_min = 0.05h <= 20mm). Excludes slender columns and significant applied moments.');
+
   const report = new CalculationReport({
     title: 'Short Braced Column Design to BS 8110-1:1997',
     subtitle: `${b}x${h} mm RC Column (BS 8110 Cl 3.8.4.3)`,
     code: 'BS 8110-1:1997'
   });
+
+  if (errors.length > 0) {
+    return { ok: false, errors, warnings, results: {}, checks: [], steps: [] };
+  }
 
   report.addStep({
     ref: 'Clause 3.8.1.1',
@@ -194,6 +219,11 @@ export function calculateShortColumn(params) {
     linkDiam,
     linkSpacing: maxLinkSpacing,
     status: isShort && capPass && steelPass ? 'PASS' : 'FAIL',
+    ok: errors.length === 0,
+    errors,
+    warnings,
+    checks: report.getChecks(),
+    steps: report.getSteps(),
     report
   };
 }

@@ -5,6 +5,7 @@
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculatePadFooting(input) {
   const errors = [];
@@ -14,24 +15,36 @@ export function calculatePadFooting(input) {
 
   const Gk = Number(input.Gk);
   const Qk = Number(input.Qk);
-  const q_all = Number(input.q_all || 200);
-  const col_c = Number(input.col_c || 400); // mm
+  const q_all = Number(input.q_all !== undefined ? input.q_all : 200);
+  const col_c = Number(input.col_c !== undefined ? input.col_c : 400); // mm
   const B = Number(input.B); // m
   const h = Number(input.h); // mm
-  const cover = Number(input.cover || 50); // mm
-  const dia = Number(input.bar_dia || 16); // mm
-  const spacing = Number(input.bar_spacing || 150); // mm
-  const fcu = Number(input.fcu || 30);
-  const fy = Number(input.fy || 500);
+  const cover = Number(input.cover !== undefined ? input.cover : 50); // mm
+  const dia = Number(input.bar_dia !== undefined ? input.bar_dia : 16); // mm
+  const spacing = Number(input.bar_spacing !== undefined ? input.bar_spacing : 150); // mm
+  const fcu = Number(input.fcu !== undefined ? input.fcu : 30);
+  const fy = Number(input.fy !== undefined ? input.fy : 500);
 
   // Validation
-  if (Gk === undefined || Number.isNaN(Gk) || Gk < 0) errors.push('Dead load Gk must be 0 or positive.');
-  if (Qk === undefined || Number.isNaN(Qk) || Qk < 0) errors.push('Imposed load Qk must be 0 or positive.');
-  if (!q_all || q_all <= 0) errors.push('Allowable bearing capacity q_all must be greater than 0.');
-  if (!B || B <= 0) errors.push('Footing width B must be greater than 0.');
-  if (!h || h <= 0) errors.push('Footing thickness h must be greater than 0.');
-  if (!col_c || col_c <= 0) errors.push('Column size must be greater than 0.');
+  if (Gk === undefined || !Validate.isNumber(Gk) || Gk < 0) errors.push('Dead load Gk must be 0 or positive.');
+  if (Qk === undefined || !Validate.isNumber(Qk) || Qk < 0) errors.push('Imposed load Qk must be 0 or positive.');
+  if ((Gk || 0) + (Qk || 0) <= 0) errors.push('Total applied column load (Gk + Qk) must be greater than 0.');
+  if (!Validate.isNumber(q_all) || q_all <= 0 || q_all > 1500) errors.push(`Allowable bearing capacity q_all (${q_all}) must be in standard range [10, 1500] kN/m².`);
+  if (!Validate.isNumber(B) || B < 0.5) errors.push(`Footing width B must be at least 0.5 m (got ${B}).`);
+  if (!Validate.isNumber(h) || h < 200) errors.push(`Footing thickness h must be at least 200 mm (got ${h}).`);
+  if (!Validate.isNumber(col_c) || col_c < 100) errors.push(`Column dimension must be at least 100 mm (got ${col_c}).`);
   if (col_c >= B * 1000) errors.push('Column size cannot exceed footing width.');
+
+  const coverCheck = Validate.coverSanity(cover, B * 1000, h);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+
+  const concCheck = Validate.concreteStrength(fcu, 'BS8110');
+  if (!concCheck.valid) errors.push(concCheck.error);
+
+  const steelCheck = Validate.steelStrength(fy, 'Steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
+
+  warnings.push('Scope: Concentric vertical axial load on isolated square pad footing (BS 8110 Cl 3.11). Excludes applied moments, horizontal loads, water table uplift, dynamic forces, and geotechnical settlement analysis.');
 
   // Minimum recommended width from service loads (with ~10% self-weight estimate)
   const est_service_load = 1.1 * (Gk + Qk);

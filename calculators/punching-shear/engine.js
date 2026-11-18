@@ -1,9 +1,11 @@
 /**
  * Punching Shear (Eurocode 2 EN 1992-1-1 Cl 6.4) Engine
+ * Hardened with strict statutory guards, explicit warnings, and non-silent capping.
  */
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculatePunchingShear(input) {
   const errors = [];
@@ -18,10 +20,10 @@ export function calculatePunchingShear(input) {
   const d = Number(input.d);
   const VEd = Number(input.VEd); // kN
   const fck = Number(input.fck || 30);
-  const rho_l_input = Number(input.rho_l || 0.0075);
+  const rho_l_input = Number(input.rho_l !== undefined ? input.rho_l : 0.0075);
   const fywk = Number(input.fywk || 500);
   const link_dia = Number(input.link_dia || 10);
-  const vrdmax_factor = Number(input.vrdmax_factor || 0.4);
+  const vrdmax_factor = Number(input.vrdmax_factor !== undefined ? input.vrdmax_factor : 0.4);
 
   // Simplified beta or user specified
   let beta = Number(input.beta);
@@ -31,17 +33,62 @@ export function calculatePunchingShear(input) {
     else beta = 1.15; // internal
   }
 
-  // Validation
-  if (!d || d <= 0) errors.push('Mean effective depth d must be greater than 0.');
-  if (VEd === undefined || Number.isNaN(VEd) || VEd <= 0) errors.push('Design shear force VEd must be greater than 0.');
-  if (!c1 || c1 <= 0) errors.push('Column dimension c1 must be greater than 0.');
-  if (col_shape === 'rectangular' && (!c2 || c2 <= 0)) errors.push('Column dimension c2 must be greater than 0.');
-  if (fck > 50) errors.push('Concrete strength fck exceeds 50 N/mm².');
+  // 1. Validation Guards (STRUCT-Agent & Codex Hardening)
+  if (!Validate.isNumber(d) || d < 50) {
+    errors.push(`Mean effective depth d must be at least 50 mm (got ${d}).`);
+  }
+  if (!Validate.isNumber(VEd) || VEd <= 0) {
+    errors.push(`Design shear force VEd must be a positive number greater than 0 kN (got ${VEd}).`);
+  }
+  if (!Validate.isNumber(c1) || c1 < 100) {
+    errors.push(`Column dimension c1 must be at least 100 mm (got ${c1}).`);
+  }
+  if (col_shape === 'rectangular' && (!Validate.isNumber(c2) || c2 < 100)) {
+    errors.push(`Column dimension c2 must be at least 100 mm (got ${c2}).`);
+  }
 
+  // Material strength guards
+  const fckCheck = Validate.concreteStrength(fck, 'EC2');
+  if (!fckCheck.valid) {
+    errors.push(fckCheck.error);
+  } else if (fck > 50) {
+    warnings.push(`Concrete strength fck (${fck} N/mm²) exceeds 50 N/mm²; high-strength concrete reduction factors may apply.`);
+  }
+
+  const fyCheck = Validate.steelStrength(fywk, 'Link yield strength fywk');
+  if (!fyCheck.valid) {
+    errors.push(fyCheck.error);
+  }
+
+  // Beta factor range validation
+  const betaCheck = Validate.punchingBeta(beta);
+  if (!betaCheck.valid) {
+    errors.push(betaCheck.error);
+  }
+
+  // vRd,max factor validation
+  if (!Validate.isNumber(vrdmax_factor) || vrdmax_factor < 0.25 || vrdmax_factor > 0.60) {
+    errors.push(`vRd,max factor (${vrdmax_factor}) is outside practical National Annex range [0.25, 0.60] (default EN is 0.40, UK NA is 0.50).`);
+  }
+
+  // Rebar ratio check (anti-silent-clamping)
+  if (!Validate.isNumber(rho_l_input) || rho_l_input < 0) {
+    errors.push(`Tension rebar ratio rho_l cannot be negative.`);
+  }
+
+  // Scope & advisory warnings
+  warnings.push('Scope: Eurocode 2 Cl 6.4 flat slab punching shear at column support. Excludes prestressed slabs, foundation slabs with non-uniform soil pressure, drop panels, and shear heads.');
   warnings.push('Openings within 6d of the column face must be checked manually per EC2 Cl 6.4.2(3).');
 
   if (errors.length > 0) {
     return { ok: false, errors, warnings, results, checks: [], steps: [] };
+  }
+
+  // 2. Concrete shear resistance rebar ratio handling (Explicit Warning instead of Silent Clamping)
+  let rho_l = rho_l_input;
+  if (rho_l_input > 0.02) {
+    warnings.push(`Reinforcement ratio rho_l (${(rho_l_input * 100).toFixed(2)}%) exceeds Eurocode 2 Cl 6.4.4(1) maximum design limit of 2.0%. Capped at 0.02 for shear capacity calculation.`);
+    rho_l = 0.02;
   }
 
   // 1. Column face perimeter u0
@@ -72,7 +119,6 @@ export function calculatePunchingShear(input) {
   const vEd_1 = (beta * VEd * 1e3) / (u1 * d);
 
   // 3. Concrete shear resistance without links vRd,c (Cl 6.4.4)
-  const rho_l = Math.min(rho_l_input, 0.02);
   const k = Math.min(1.0 + Math.sqrt(200.0 / d), 2.0);
   const v_calc = 0.12 * k * Math.pow(100.0 * rho_l * fck, 1 / 3);
   const v_min = 0.035 * Math.pow(k, 1.5) * Math.sqrt(fck);
@@ -114,6 +160,7 @@ export function calculatePunchingShear(input) {
   results.u1 = u1;
   results.vEd_1 = vEd_1;
   results.k = k;
+  results.rho_l = rho_l;
   results.vRd_c = vRd_c;
   results.v_min = v_min;
   results.fywd_ef = fywd_ef;

@@ -5,6 +5,7 @@
  */
 
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateBeam(params) {
   const {
@@ -15,6 +16,26 @@ export function calculateBeam(params) {
     E = 200000,                       // Modulus of elasticity (MPa = N/mm2 = 1000 kN/m2 * 1000 = 10^6 kN/m2)
     I = 1.0e8                         // Second moment of area (mm4)
   } = params;
+
+  const errors = [];
+  const warnings = [];
+
+  if (!Validate.isNumber(L) || L <= 0) errors.push(`Beam span L must be greater than 0 m (got ${L}).`);
+  if (!Validate.isNumber(E) || E <= 0) errors.push(`Modulus of elasticity E must be greater than 0 MPa (got ${E}).`);
+  if (!Validate.isNumber(I) || I <= 0) errors.push(`Second moment of area I must be greater than 0 mm⁴ (got ${I}).`);
+
+  // Guard load positions
+  pointLoads.forEach((pl, idx) => {
+    if (!Validate.isNumber(pl.a) || pl.a < 0 || pl.a > L) {
+      errors.push(`Point load #${idx + 1} position a (${pl.a} m) is outside beam span [0, ${L}] m.`);
+    }
+  });
+
+  warnings.push('Scope: Linear elastic beam analysis under static transverse loads. Concrete cracking, creep, reinforcement design, and moment redistribution are excluded.');
+
+  if (errors.length > 0) {
+    return { ok: false, errors, warnings, results: {}, checks: [], steps: [] };
+  }
 
   // Convert E and I to consistent kN and m units
   // E in MPa = N/mm2 = 10^6 N/m2 = 10^3 kN/m2 -> E_kNm2 = E * 1000
@@ -314,6 +335,11 @@ export function calculateBeam(params) {
     V,
     M,
     delta_mm,
+    ok: errors.length === 0,
+    errors,
+    warnings,
+    checks: report.getChecks(),
+    steps: report.getSteps(),
     report
   };
 }

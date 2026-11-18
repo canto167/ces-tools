@@ -4,6 +4,7 @@
  */
 
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateAnchorageLapEC2(params) {
   const {
@@ -21,11 +22,28 @@ export function calculateAnchorageLapEC2(params) {
     rho1 = 100              // % of lapped bars
   } = params;
 
+  const errors = [];
+  const warnings = [];
+
+  if (!Validate.isNumber(barDia) || barDia < 6 || barDia > 40) {
+    errors.push(`Bar diameter barDia (${barDia} mm) must be in standard range [6, 40] mm.`);
+  }
+  const fckCheck = Validate.concreteStrength(fck, 'EC2');
+  if (!fckCheck.valid) errors.push(fckCheck.error);
+  const fyCheck = Validate.steelStrength(fyk, 'Steel yield strength fyk');
+  if (!fyCheck.valid) errors.push(fyCheck.error);
+
+  warnings.push('Scope: Standard straight tension and compression anchorage and lap lengths to EN 1992-1-1 Cl 8.4 & 8.7. Bundled bars, welded transverse bars, and mechanical couplers are excluded.');
+
   const report = new CalculationReport({
     title: 'Anchorage & Lap Length to Eurocode 2 (EN 1992-1-1)',
     subtitle: `Bar φ${barDia} mm, C${fck}/${fck + 7}, Grade B${fyk}`,
     code: 'EN 1992-1-1:2004'
   });
+
+  if (errors.length > 0) {
+    return { ok: false, errors, warnings, results: {}, checks: [], steps: [] };
+  }
 
   const eta1 = bondCondition === 'good' ? 1.0 : 0.7;
   const eta2 = barDia <= 32 ? 1.0 : (132 - barDia) / 100;
@@ -123,6 +141,9 @@ export function calculateAnchorageLapEC2(params) {
     l0_min,
     l0,
     l0_phi,
+    ok: errors.length === 0,
+    errors,
+    warnings,
     report
   };
 }
@@ -135,11 +156,28 @@ export function calculateAnchorageLapBS8110(params) {
     forceType = 'tension' // 'tension' or 'compression'
   } = params;
 
+  const errors = [];
+  const warnings = [];
+
+  if (!Validate.isNumber(barDia) || barDia < 6 || barDia > 40) {
+    errors.push(`Bar diameter barDia (${barDia} mm) must be in standard range [6, 40] mm.`);
+  }
+  const fcuCheck = Validate.concreteStrength(fcu, 'BS8110');
+  if (!fcuCheck.valid) errors.push(fcuCheck.error);
+  const fyCheck = Validate.steelStrength(fy, 'Steel yield strength fy');
+  if (!fyCheck.valid) errors.push(fyCheck.error);
+
+  warnings.push('Scope: Standard straight tension and compression anchorage and lap lengths to BS 8110-1:1997 Cl 3.12.8.');
+
   const report = new CalculationReport({
     title: 'Anchorage & Lap Length to BS 8110-1:1997',
     subtitle: `Bar φ${barDia} mm, Grade ${fcu}, fy = ${fy} MPa`,
     code: 'BS 8110-1:1997'
   });
+
+  if (errors.length > 0) {
+    return { ok: false, errors, warnings, results: {}, checks: [], steps: [] };
+  }
 
   // Cl 3.12.8.4: fcu <= 40 for bond calculation
   const fcu_eff = Math.min(fcu, 40);
@@ -195,6 +233,9 @@ export function calculateAnchorageLapBS8110(params) {
     lap_1_4_phi: lap_1_4 / barDia,
     lap_2_0,
     lap_2_0_phi: lap_2_0 / barDia,
+    ok: errors.length === 0,
+    errors,
+    warnings,
     report
   };
 }

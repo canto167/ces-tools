@@ -4,6 +4,7 @@
  */
 
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateRetainingWall(params) {
   const {
@@ -25,11 +26,49 @@ export function calculateRetainingWall(params) {
     fy = 500            // Reinforcement yield strength (MPa)
   } = params;
 
+  const errors = [];
+  const warnings = [];
+
+  // Input Guards (STRUCT-Agent & Codex Hardening)
+  if (!Validate.isNumber(h_stem) || h_stem < 1.0) errors.push(`Stem height h_stem must be at least 1.0 m (got ${h_stem}).`);
+  if (!Validate.isNumber(t_stem) || t_stem < 0.15) errors.push(`Stem thickness t_stem must be at least 0.15 m (got ${t_stem}).`);
+  if (!Validate.isNumber(t_base) || t_base < 0.20) errors.push(`Base thickness t_base must be at least 0.20 m (got ${t_base}).`);
+  if (!Validate.isNumber(b_toe) || b_toe < 0.1) errors.push(`Toe projection b_toe must be at least 0.1 m (got ${b_toe}).`);
+  if (!Validate.isNumber(b_heel) || b_heel < 0.2) errors.push(`Heel projection b_heel must be at least 0.2 m (got ${b_heel}).`);
+
+  const phiCheck = Validate.soilFriction(phi);
+  if (!phiCheck.valid) errors.push(phiCheck.error);
+
+  if (!Validate.isNumber(gamma_soil) || gamma_soil < 12 || gamma_soil > 24) {
+    errors.push(`Soil unit weight gamma_soil (${gamma_soil} kN/m³) is outside standard range [12, 24] kN/m³.`);
+  }
+  if (!Validate.isNumber(mu) || mu < 0.2 || mu > 0.8) {
+    errors.push(`Base-soil friction coefficient mu (${mu}) must be in range [0.2, 0.8].`);
+  }
+  if (!Validate.isNumber(q_all) || q_all <= 0) {
+    errors.push(`Allowable soil bearing capacity q_all must be greater than 0.`);
+  }
+
+  const concCheck = Validate.concreteStrength(fcu, 'BS8110');
+  if (!concCheck.valid) errors.push(concCheck.error);
+
+  const steelCheck = Validate.steelStrength(fy, 'Steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
+
+  const coverCheck = Validate.coverSanity(cover, t_stem * 1000, t_stem * 1000);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+
+  warnings.push('Scope: Cantilever RC retaining wall with dry granular cohesive-less backfill (Rankine theory, horizontal backfill). Hydrostatic groundwater pressure, sloping backfill, seismic forces, and deep global slip-circle slope stability excluded.');
+
   const report = new CalculationReport({
     title: 'Cantilever Retaining Wall Stability & Stem Design',
     subtitle: `H = ${(h_stem + t_base).toFixed(2)} m, Base B = ${(b_toe + t_stem + b_heel).toFixed(2)} m`,
     code: 'Rankine Active Earth Pressure & BS 8110-1:1997'
   });
+
+  if (errors.length > 0) {
+    return { ok: false, errors, warnings, results: {}, checks: [], steps: [] };
+  }
 
   // Overall Geometry
   const H = h_stem + t_base; // Total height (m)
@@ -266,6 +305,11 @@ export function calculateRetainingWall(params) {
     pass_steel,
     pass_shear,
     status: overallPass ? 'PASS' : 'FAIL',
+    ok: errors.length === 0,
+    errors,
+    warnings,
+    checks: report.getChecks(),
+    steps: report.getSteps(),
     report
   };
 }

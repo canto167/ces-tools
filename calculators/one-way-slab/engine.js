@@ -5,6 +5,7 @@
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateOneWaySlab(input) {
   const errors = [];
@@ -30,10 +31,19 @@ export function calculateOneWaySlab(input) {
   const fy = fyk;
 
   // Validation
-  if (!L || L <= 0) errors.push('Span length L must be greater than 0.');
-  if (!h || h <= 0) errors.push('Slab depth h must be greater than 0.');
-  if (!cover || cover <= 0) errors.push('Concrete cover must be greater than 0.');
-  if (main_spacing <= 0) errors.push('Main bar spacing must be greater than 0.');
+  if (!Validate.isNumber(L) || L <= 0) errors.push('Span length L must be greater than 0.');
+  if (!Validate.isNumber(h) || h < 75) errors.push(`Slab overall depth h must be at least 75 mm (got ${h}).`);
+  const coverCheck = Validate.coverSanity(cover, 1000, h);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+  if (!Validate.isNumber(main_spacing) || main_spacing <= 0) errors.push('Main bar spacing must be greater than 0.');
+
+  const concCheck = Validate.concreteStrength(fck, code);
+  if (!concCheck.valid) errors.push(concCheck.error);
+
+  const steelCheck = Validate.steelStrength(fyk, 'Main steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
+
+  warnings.push('Scope: Simply supported or continuous one-way slab 1m design strip. Openings, concentrated point loads, and transverse load redistribution excluded.');
 
   if (errors.length > 0) {
     return { ok: false, errors, warnings, results, checks: [], steps: [] };

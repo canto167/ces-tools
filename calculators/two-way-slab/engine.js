@@ -5,6 +5,7 @@
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 const TABLE_313 = [
   { ratio: 1.0, asx: 0.062, asy: 0.062 },
@@ -57,18 +58,27 @@ export function calculateTwoWaySlab(input) {
   const fcu = Number(input.fcu || 30);
   const fy = Number(input.fy || 500);
 
-  if (!lx || lx <= 0) errors.push('Short span lx must be greater than 0.');
-  if (!ly || ly <= 0) errors.push('Long span ly must be greater than 0.');
+  if (!Validate.isNumber(lx) || lx <= 0) errors.push('Short span lx must be greater than 0.');
+  if (!Validate.isNumber(ly) || ly <= 0) errors.push('Long span ly must be greater than 0.');
   if (lx > ly) errors.push('lx must be the shorter span (lx ≤ ly).');
-  if (!h || h <= 0) errors.push('Slab depth h must be greater than 0.');
-  if (!cover || cover <= 0) errors.push('Cover must be greater than 0.');
+  if (!Validate.isNumber(h) || h < 75) errors.push(`Slab overall depth h must be at least 75 mm (got ${h}).`);
+  const coverCheck = Validate.coverSanity(cover, lx * 1000, h);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+
+  const concCheck = Validate.concreteStrength(fcu, 'BS8110');
+  if (!concCheck.valid) errors.push(concCheck.error);
+
+  const steelCheck = Validate.steelStrength(fy, 'Steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
 
   const ratio = ly / lx;
   results.ratio = ratio;
 
   if (ratio > 2.0) {
-    warnings.push('Aspect ratio ly/lx > 2.0: Two-way action is negligible. Please design as a One-Way Slab.');
+    warnings.push(`Aspect ratio ly/lx (${ratio.toFixed(2)}) > 2.0: Two-way action ceases per BS 8110 Cl 3.5.3.3. Slabs with ly/lx > 2.0 must be designed as one-way spanning.`);
   }
+
+  warnings.push('Scope: Simply supported rectangular slab on 4 non-deflecting supports with corners free to lift (BS 8110 Table 3.13). Continuous/restrained edges, torsional edge reinforcement, and point loads excluded.');
 
   if (errors.length > 0) {
     return { ok: false, errors, warnings, results, checks: [], steps: [] };

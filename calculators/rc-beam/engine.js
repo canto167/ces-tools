@@ -6,6 +6,7 @@
 
 import { Bars } from '../../shared/js/core/bars.js';
 import { CalculationReport } from '../../shared/js/core/report.js';
+import { Validate } from '../../shared/js/core/validate.js';
 
 export function calculateRcBeam(input) {
   const errors = [];
@@ -49,16 +50,25 @@ export function calculateRcBeam(input) {
   const acc = Number(input.acc || 1.0); // National Annex parameter for EC2
 
   // Validation
-  if (!b || b <= 0) errors.push('Beam width b must be greater than 0.');
-  if (!h || h <= 0) errors.push('Beam depth h must be greater than 0.');
-  if (!cover || cover <= 0) errors.push('Concrete cover must be greater than 0.');
-  if (M === undefined || Number.isNaN(M) || M < 0) errors.push('Design moment M must be 0 or positive.');
-  if (V === undefined || Number.isNaN(V) || V < 0) errors.push('Design shear V must be 0 or positive.');
-  if (!L || L <= 0) errors.push('Span length L must be greater than 0.');
+  if (!Validate.isNumber(b) || b < 100) errors.push(`Beam width b must be at least 100 mm (got ${b}).`);
+  if (!Validate.isNumber(h) || h < 150) errors.push(`Beam depth h must be at least 150 mm (got ${h}).`);
+  const coverCheck = Validate.coverSanity(cover, b, h);
+  if (!coverCheck.valid) errors.push(coverCheck.error);
+  if (M === undefined || !Validate.isNumber(M) || M < 0) errors.push('Design moment M must be 0 or positive.');
+  if (V === undefined || !Validate.isNumber(V) || V < 0) errors.push('Design shear V must be 0 or positive.');
+  if (!Validate.isNumber(L) || L <= 0) errors.push('Span length L must be greater than 0.');
 
-  if (code === 'EC2' && fck > 50) {
+  const concCheck = Validate.concreteStrength(fck, code);
+  if (!concCheck.valid) {
+    errors.push(concCheck.error);
+  } else if (code === 'EC2' && fck > 50) {
     errors.push('Concrete strength fck exceeds 50 N/mm² (higher grades require modified stress blocks).');
   }
+
+  const steelCheck = Validate.steelStrength(fyk, 'Main steel yield strength');
+  if (!steelCheck.valid) errors.push(steelCheck.error);
+
+  warnings.push('Scope: Singly and doubly reinforced rectangular beam flexure and shear. Flanged T/L sections, torsion, and axial-flexure interaction are excluded.');
 
   if (errors.length > 0) {
     return { ok: false, errors, warnings, results, checks: [], steps: [] };
