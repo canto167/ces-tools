@@ -18,8 +18,8 @@
 ---
 
 ## Phase 1 — Core Calculators Suite (C1 - C11)
-- [x] **C1: RC Rectangular Beam** (`rc-beam`) — EC2 & BS 8110 🟢 (4/4 Acceptance Tests Pass: EC2-1, EC2-2, BS-1, BS-2; 4 Screenshots verified)
-- [ ] **C2: One-Way Slab** (`one-way-slab`) — EC2 & BS 8110 ⚪
+- [x] **C1: RC Rectangular Beam** (`rc-beam`) — EC2 & BS 8110 🟢 (4/4 Tests Pass; 4 Screenshots)
+- [x] **C2: One-Way Slab** (`one-way-slab`) — EC2 & BS 8110 🟢 (3/3 Tests Pass; 4 Screenshots)
 - [ ] **C3: Two-Way Slab (Simply Supported)** (`two-way-slab`) — BS 8110 Table 3.13 ⚪
 - [ ] **C4: Punching Shear** (`punching-shear`) — EC2 ⚪
 - [ ] **C5: Square Pad Footing** (`pad-footing`) — BS 8110 ⚪

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>One-Way Slab Designer (EC2 & BS 8110) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header for PDF / Print Output -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Slab Structural Calculation</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-SL-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> 1-metre One-Way Slab Strip</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Code:</strong> <span id="lbl_code_tag">BS 8110-1:1997</span></td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <!-- Screen Header -->
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">One-Way Slab Designer</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">1m Strip Flexure, Shear without Links, & Deflection</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div id="errorAlert" class="card" style="display: none; background: var(--color-red-light); border-color: var(--color-red); color: var(--color-red);"></div>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Design Code & Standard</div>
+          <div style="display: flex; gap: 16px;">
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer;">
+              <input type="radio" name="design_code" value="BS8110" checked> BS 8110-1:1997
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; font-weight: 600; cursor: pointer;">
+              <input type="radio" name="design_code" value="EC2"> Eurocode 2 (EN 1992-1-1)
+            </label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Slab Dimensions & Span</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="L">Effective Span, L <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="L" class="form-input" value="4.0" min="1.0" max="15.0" step="0.25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="h">Thickness, h <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="h" class="form-input" value="175" min="75" max="600" step="10">
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="cover">Cover to Main Bar, c <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="cover" class="form-input" value="25" min="15" max="60" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="support">Support Framing</label>
+              <select id="support" class="form-input" style="padding: 7px 10px;">
+                <option value="simply_supported" selected>Simply Supported</option>
+                <option value="end_span">Continuous - End Span (Table 3.12)</option>
+                <option value="interior_span">Continuous - Interior Span (Table 3.12)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table 3.12 conditions checklist -->
+          <div id="table312Conditions" style="display: none; background: var(--bg-page); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; margin-top: 10px; font-size: 11px;">
+            <strong>BS 8110 Table 3.12 Applicability Checklist:</strong>
+            <ul style="margin-left: 16px; margin-top: 4px;">
+              <li>At least 3 spans roughly equal (within 15%)</li>
+              <li>Imposed load qk ≤ 1.25 gk and qk ≤ 5 kN/m²</li>
+              <li>Slab area of bays > 30 m²</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Superimposed Loads</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="finishes">Finishes & Partitions <span class="unit">(kN/m²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="finishes" class="form-input" value="1.0" min="0" max="10" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qk">Imposed Variable Load, qk <span class="unit">(kN/m²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="qk" class="form-input" value="3.0" min="0" max="25" step="0.5">
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">
+            Concrete self-weight computed automatically based on code standard unit weight.
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Material Strengths</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fck_fcu"><span id="lbl_conc_strength">fcu (Cube strength)</span> <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fck_fcu" class="form-input" value="30" min="20" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fyk_fy"><span id="lbl_steel_strength">fy (Yield strength)</span> <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fyk_fy" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Provided Reinforcement</div>
+          <div class="form-group">
+            <label class="form-label">Main Tension Bars (Bottom)</label>
+            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 8px;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Diameter:</span>
+              <div id="main_bar_dia_group" style="flex: 1;"></div>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Spacing:</span>
+              <div class="input-with-stepper" style="width: 140px;">
+                <input type="number" id="main_bar_spacing" class="form-input" value="150" min="75" max="450" step="25">
+              </div>
+              <span style="font-size: 12px; color: var(--text-muted);">mm c/c</span>
+            </div>
+          </div>
+
+          <div class="form-group" style="padding-top: 10px; border-top: 1px solid var(--border-color);">
+            <label class="form-label">Distribution / Secondary Bars</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <span style="font-size: 13px; font-weight: 600; width: 60px;">Diameter:</span>
+              <div id="dist_bar_dia_group" style="flex: 1;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Slab Cross-Section (1m Strip)</div>
+          <div class="svg-canvas-container">
+            <svg id="slabSectionSVG" width="380" height="260"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Design Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Equation</th>
+                    <th>Substitution</th>
+                    <th>Result</th>
+                    <th>Clause</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — One-Way Slab Designer v1.0.
+    </div>
+
+    <!-- Screen Disclaimer -->
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> This free calculation tool is provided for educational and preliminary design verification purposes. The author and Civil Engineer Society accept no liability for decisions made using this application.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initOneWaySlabUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initOneWaySlabUI();
+    });
+  </script>
+</body>
+</html>

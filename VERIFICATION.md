@@ -53,3 +53,37 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C1 rc-beam** | BS-2 | MFc | 1.091 | 1.091 | 0.00% | 🟢 PASS |
 | **C1 rc-beam** | BS-2 | allowable l/d | 18.47 | 18.47 | 0.00% | 🟢 PASS |
 | **C1 rc-beam** | BS-2 | actual span/d | 13.41 | 13.41 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | d (mm) | 145.0 | 145.00 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | gk (kN/m²) | 5.20 | 5.20 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | n (kN/m²) | 12.08 | 12.08 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | M (kNm/m) | 24.16 | 24.16 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | V (kN/m) | 24.16 | 24.16 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | K | 0.0383 | 0.0383 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | z (mm) | 137.75 | 137.75 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | As (mm²/m) | 403.2 | 403.20 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | As,min (mm²/m) | 227.5 | 227.50 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | As,prov (mm²/m) | 523.6 | 523.60 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | fs (N/mm²) | 256.7 | 256.68 | 0.01% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | MF | 1.446 | 1.446 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | allowable l/d | 28.92 | 28.92 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | v (N/mm²) | 0.167 | 0.167 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1 | vc (N/mm²) | 0.616 | 0.616 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1b | As,prov (mm²/m) | 448.8 | 448.80 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1b | MF | 1.272 | 1.272 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1b | allowable l/d | 25.44 | 25.44 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | BS-1b | Deflection Check | FAIL | FAIL (actual 27.59 > 25.44) | — | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | gk (kN/m²) | 5.375 | 5.375 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | n (kN/m²) | 11.756 | 11.756 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | M (kNm/m) | 23.513 | 23.513 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | V (kN/m) | 23.513 | 23.513 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | K | 0.0373 | 0.0373 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | z (mm) | 137.75 | 137.75 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | As (mm²/m) | 392.6 | 392.59 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | As,min (mm²/m) | 218.4 | 218.40 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | As,prov (mm²/m) | 448.8 | 448.80 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | l/d basic | 45.76 | 45.76 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | allowable l/d | 52.31 | 52.31 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | v,min (N/mm²) | 0.5422 | 0.5422 | 0.00% | 🟢 PASS |
+| **C2 one-way-slab** | EC2-1 | VRd,c (kN/m) | 78.6 | 78.62 | 0.03% | 🟢 PASS |
