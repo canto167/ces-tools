@@ -135,3 +135,19 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C6 short-column** | BS-1 | link phi (mm) | 6 | 6 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | link spacing (mm) | 240 | 240 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 (k=0.75) | Asc,req (mm²) | 1120.0 | 1120.00 | 0.00% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | fctm (MPa) | 2.896 | 2.896 | 0.02% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | fctk,0.05 (MPa) | 2.028 | 2.028 | 0.02% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | fctd (MPa) | 1.352 | 1.352 | 0.02% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | fbd (MPa) | 3.041 | 3.041 | 0.01% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | lb,rqd (mm) | 572.1 | 571.84 | 0.05% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | lb,rqd (phi) | 35.8 | 35.74 | 0.17% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | lb,min (mm) | 171.6 | 171.55 | 0.03% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | l0 (mm) | 858.2 | 857.76 | 0.05% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 | l0,min (mm) | 257.5 | 257.33 | 0.07% | 🟢 PASS |
+| **C7 anchorage-lap** | EC2-1 (Poor) | lb,rqd (mm) | 817.3 | 816.91 | 0.05% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | fbu (MPa) | 2.739 | 2.739 | 0.01% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | anchorage (mm) | 635.4 | 635.36 | 0.01% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | anchorage (phi) | 39.7 | 39.71 | 0.03% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | lap x1.4 (mm) | 889.5 | 889.50 | 0.00% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | lap x2.0 (mm) | 1270.7 | 1270.72 | 0.00% | 🟢 PASS |
+| **C7 anchorage-lap** | BS-1 | lap min (mm) | 300.0 | 300.00 | 0.00% | 🟢 PASS |

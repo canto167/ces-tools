@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Anchorage and Lap Length Calculator (EC2 & BS 8110) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Rebar Anchorage & Lap Length Schedule</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-BOND-01</td>
+      </tr>
+      <tr>
+        <td><strong>Element:</strong> Tension & Compression Splicing</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Codes:</strong> Eurocode 2 (EN 1992-1-1 Cl 8.4/8.7) & BS 8110-1:1997 Cl 3.12.8</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Anchorage and Lap Length Calculator</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Eurocode 2 (EN 1992-1-1) & BS 8110-1:1997 Bond Strength & Laps</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Design Code & Reinforcement Size</div>
+          <div class="form-group">
+            <label class="form-label">Governing Design Standard</label>
+            <div style="display: flex; gap: 16px; margin-top: 4px;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="designCode" value="EC2" checked>
+                <span><strong>Eurocode 2</strong> (EN 1992-1-1)</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="radio" name="designCode" value="BS8110">
+                <span><strong>BS 8110</strong> (1997)</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top: 14px;">
+            <label class="form-label">Bar Diameter, φ (mm)</label>
+            <div id="barDia_group"></div>
+          </div>
+        </div>
+
+        <!-- EC2 Parameters -->
+        <div id="panel-ec2" class="card">
+          <div class="card-title">Eurocode 2 Parameters (EN 1992-1-1)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fck">Concrete Grade, fck <span class="unit">(MPa)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fck" class="form-input" value="30" min="20" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fyk">Rebar Yield, fyk <span class="unit">(MPa)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fyk" class="form-input" value="500" min="400" max="600" step="50">
+              </div>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="bondCondition">Bond Conditions</label>
+              <select id="bondCondition" class="form-select">
+                <option value="good">Good bond (η₁ = 1.0)</option>
+                <option value="poor">Poor bond (η₁ = 0.7)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="rho1">Lapped Bars, ρ₁ <span class="unit">(%)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="rho1" class="form-input" value="100" min="20" max="100" step="25">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BS 8110 Parameters -->
+        <div id="panel-bs8110" class="card" style="display: none;">
+          <div class="card-title">BS 8110 Parameters (BS 8110-1:1997)</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fcu">Concrete Grade, fcu <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fcu" class="form-input" value="30" min="25" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fy">Rebar Yield, fy <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fy" class="form-input" value="500" min="400" max="600" step="50">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="forceType">Force Type</label>
+            <select id="forceType" class="form-select">
+              <option value="tension">Tension (β = 0.50, Type 2 Deformed)</option>
+              <option value="compression">Compression (β = 0.63, Type 2 Deformed)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Lap Splice Geometry & Spliced Bar Embedment</div>
+          <div class="svg-canvas-container">
+            <svg id="lapSVG" width="440" height="240"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabComp">Code Comparison</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <div id="tabComp" class="tab-pane active">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Design Parameter</th>
+                    <th>Eurocode 2 (EN 1992-1-1)</th>
+                    <th>BS 8110-1:1997</th>
+                    <th>Difference</th>
+                  </tr>
+                </thead>
+                <tbody id="compTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Equation</th>
+                    <th>Substitution / Values</th>
+                    <th>Clause Ref</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Anchorage & Lap Length Calculator v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and preliminary design verification. Splicing schedules and stagger detailing must be verified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initAnchorageLapUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initAnchorageLapUI();
+    });
+  </script>
+</body>
+</html>
