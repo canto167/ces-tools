@@ -87,3 +87,21 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C2 one-way-slab** | EC2-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
 | **C2 one-way-slab** | EC2-1 | v,min (N/mm²) | 0.5422 | 0.5422 | 0.00% | 🟢 PASS |
 | **C2 one-way-slab** | EC2-1 | VRd,c (kN/m) | 78.6 | 78.62 | 0.03% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | ratio (ly/lx) | 1.25 | 1.25 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | alpha_sx | 0.0885 | 0.0885 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | alpha_sy | 0.0570 | 0.0570 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | n (kN/m²) | 12.08 | 12.08 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | msx (kNm/m) | 17.11 | 17.11 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | msy (kNm/m) | 11.02 | 11.02 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | dx (mm) | 145.0 | 145.00 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | dy (mm) | 135.0 | 135.00 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | Asx (mm²/m) | 285.5 | 285.50 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | Asy (mm²/m) | 197.5 | 197.50 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | As,min (mm²/m) | 227.5 | 227.50 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | Apx (mm²/m) | 392.7 | 392.70 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | Apy (mm²/m) | 261.8 | 261.80 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | MF | 1.691 | 1.691 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | allowable l/d | 33.83 | 33.83 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | v (N/mm²) | 0.167 | 0.167 | 0.00% | 🟢 PASS |
+| **C3 two-way-slab** | BS-1 | vc (N/mm²) | 0.561 | 0.560 | 0.18% | 🟢 PASS |

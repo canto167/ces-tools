@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Two-Way Slab (Simply Supported) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Two-Way Slab Calculation</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-2WS-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> Rectangular Slab Panel (Corners Free)</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Code:</strong> BS 8110-1:1997 Table 3.13</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Two-Way Slab (Simply Supported)</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">BS 8110 Table 3.13 Moment Coefficients & Reinforcement</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div id="errorAlert" class="card" style="display: none;"></div>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Panel Spans & Thickness</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="lx">Short Span, lx <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="lx" class="form-input" value="4.0" min="1.0" max="15.0" step="0.25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="ly">Long Span, ly <span class="unit">(m)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="ly" class="form-input" value="5.0" min="1.0" max="25.0" step="0.25">
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="h">Thickness, h <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="h" class="form-input" value="175" min="75" max="600" step="10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cover">Nominal Cover, c <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="cover" class="form-input" value="25" min="15" max="60" step="5">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Superimposed Loads</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="finishes">Finishes & Screed <span class="unit">(kN/m²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="finishes" class="form-input" value="1.0" min="0" max="10" step="0.5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="qk">Imposed Load, qk <span class="unit">(kN/m²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="qk" class="form-input" value="3.0" min="0" max="25" step="0.5">
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted);">
+            Self-weight is calculated automatically at 24 kN/m³ (reinforced concrete).
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Material Strengths</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fcu">fcu (Cube strength) <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fcu" class="form-input" value="30" min="20" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fy">fy (Yield strength) <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fy" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Provided Reinforcement Layout</div>
+          <div class="form-group">
+            <label class="form-label">Bar Diameter (Both Directions)</label>
+            <div id="bar_dia_group"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 10px;">
+            <div class="form-group">
+              <label class="form-label" for="sx">Short Span Spacing, sx <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="sx" class="form-input" value="200" min="75" max="450" step="25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="sy">Long Span Spacing, sy <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="sy" class="form-input" value="300" min="75" max="450" step="25">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Plan View & Span Ratio</div>
+          <div class="svg-canvas-container">
+            <svg id="twoWaySlabSVG" width="380" height="300"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Design Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Report</button>
+          </div>
+
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Equation</th>
+                    <th>Substitution</th>
+                    <th>Result</th>
+                    <th>Clause</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Two-Way Slab Designer v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and checking purposes. Results must be verified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initTwoWaySlabUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initTwoWaySlabUI();
+    });
+  </script>
+</body>
+</html>
