@@ -30,12 +30,30 @@ export function calculateSchedule(rows = [], wastagePct = 0) {
   let grandTotalLength = 0;
   let grandTotalWeightKg = 0;
 
+  const errors = [];
+  const STANDARD_DIAS = [6, 8, 10, 12, 16, 20, 25, 32, 40];
+  const wastageNum = Number(wastagePct);
+  if (!Number.isFinite(wastageNum) || wastageNum < 0 || wastageNum > 50) {
+    errors.push(`Wastage must be between 0 and 50% (got ${wastagePct}).`);
+  }
+
   rows.forEach((row, idx) => {
     const mark = row.mark || `B${idx + 1}`;
-    const dia = Number(row.dia) || 16;
-    const members = Number(row.members) || 1;
-    const barsPerMember = Number(row.barsPerMember) || 1;
-    const length = Number(row.length) || 0; // m
+    const dia = Number(row.dia);
+    const members = Number(row.members);
+    const barsPerMember = Number(row.barsPerMember);
+    const length = Number(row.length); // m
+
+    const rowErrors = [];
+    if (!STANDARD_DIAS.includes(dia)) rowErrors.push(`bar diameter ${row.dia} is not a standard size`);
+    if (!Number.isInteger(members) || members < 1) rowErrors.push('number of members must be a whole number of at least 1');
+    if (!Number.isInteger(barsPerMember) || barsPerMember < 1) rowErrors.push('bars per member must be a whole number of at least 1');
+    if (!Number.isFinite(length) || length <= 0 || length > 50) rowErrors.push('cut length must be greater than 0 and not more than 50 m');
+    if (rowErrors.length) {
+      errors.push(`Row ${mark}: ${rowErrors.join('; ')}. This row is left out of the totals.`);
+      evaluatedRows.push({ id: row.id || idx + 1, mark, dia, members, barsPerMember, totalBars: 0, length, totalLength: 0, unitWeight: 0, ruleWeight: 0, totalWeightKg: 0, invalid: true });
+      return;
+    }
 
     const totalBars = members * barsPerMember;
     const totalLength = totalBars * length; // m
@@ -75,7 +93,8 @@ export function calculateSchedule(rows = [], wastagePct = 0) {
     });
   });
 
-  const wastageMultiplier = 1 + (Number(wastagePct) || 0) / 100;
+  const wastageSafe = errors.some(e => e.startsWith('Wastage')) ? 0 : wastageNum;
+  const wastageMultiplier = 1 + wastageSafe / 100;
   const grandTotalWithWastageKg = grandTotalWeightKg * wastageMultiplier;
   const grandTotalTonnes = grandTotalWithWastageKg / 1000;
 
@@ -98,7 +117,9 @@ export function calculateSchedule(rows = [], wastagePct = 0) {
     diameterSummary: Object.values(diameterSummary).sort((a, b) => a.dia - b.dia),
     grandTotalLength,
     grandTotalWeightKg,
-    wastagePct: Number(wastagePct) || 0,
+    wastagePct: wastageSafe,
+    ok: errors.length === 0,
+    errors,
     grandTotalWithWastageKg,
     grandTotalTonnes,
     report

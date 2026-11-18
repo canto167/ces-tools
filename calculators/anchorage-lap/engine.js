@@ -32,6 +32,17 @@ export function calculateAnchorageLapEC2(params) {
   if (!fckCheck.valid) errors.push(fckCheck.error);
   const fyCheck = Validate.steelStrength(fyk, 'Steel yield strength fyk');
   if (!fyCheck.valid) errors.push(fyCheck.error);
+  if (bondCondition !== 'good' && bondCondition !== 'poor') errors.push(`Bond condition must be "good" or "poor" (got "${bondCondition}").`);
+  [['alpha1', alpha1], ['alpha2', alpha2], ['alpha3', alpha3], ['alpha4', alpha4], ['alpha5', alpha5]].forEach(([name, val]) => {
+    if (!Validate.isNumber(val) || val < 0.7 || val > 1.0) errors.push(`${name} must be between 0.7 and 1.0 (EN 1992-1-1 Table 8.2), got ${val}.`);
+  });
+  if (params.alpha6 !== undefined && (!Validate.isNumber(alpha6) || alpha6 < 1.0 || alpha6 > 1.5)) {
+    errors.push(`alpha6 must be between 1.0 and 1.5 (EN 1992-1-1 Table 8.3), got ${alpha6}.`);
+  }
+  if (!Validate.isNumber(rho1) || rho1 <= 0 || rho1 > 100) errors.push(`Percentage of lapped bars rho1 must be between 0 and 100% (got ${rho1}).`);
+  if (sigma_sd !== null && (!Validate.isNumber(Number(sigma_sd)) || Number(sigma_sd) <= 0 || Number(sigma_sd) > fyk / 1.15)) {
+    errors.push(`Design bar stress σsd must be greater than 0 and not more than fyd = ${(fyk / 1.15).toFixed(1)} N/mm².`);
+  }
 
   warnings.push('Scope: Standard straight tension and compression anchorage and lap lengths to EN 1992-1-1 Cl 8.4 & 8.7. Bundled bars, welded transverse bars, and mechanical couplers are excluded.');
 
@@ -48,8 +59,10 @@ export function calculateAnchorageLapEC2(params) {
   const eta1 = bondCondition === 'good' ? 1.0 : 0.7;
   const eta2 = barDia <= 32 ? 1.0 : (132 - barDia) / 100;
 
-  // Tensile strength
-  const fctm = 0.30 * Math.pow(fck, 2 / 3);
+  // Tensile strength. Cl 8.4.2(2): fctd is limited to the value for C60/75.
+  const fck_bond = Math.min(fck, 60);
+  if (fck > 60) warnings.push('fctd is limited to the C60/75 value for bond (EN 1992-1-1 Cl 8.4.2(2)).');
+  const fctm = 0.30 * Math.pow(fck_bond, 2 / 3);
   const fctk005 = 0.70 * fctm;
   const gamma_c = 1.5;
   const alpha_ct = 1.0;
@@ -82,9 +95,9 @@ export function calculateAnchorageLapEC2(params) {
     a6 = Math.min(1.5, Math.max(1.0, Math.sqrt(rho1 / 25)));
   }
 
-  // Minimum lap length
+  // Lap length, EN 1992-1-1 Eq 8.10: l0 = alpha1 alpha2 alpha3 alpha5 alpha6 lb,rqd >= l0,min (alpha4 is not included).
   const l0_min = Math.max(0.3 * a6 * lb_rqd, 15 * barDia, 200);
-  const l0 = Math.max(a6 * lbd, l0_min);
+  const l0 = Math.max(alpha1 * a235_eff * a6 * lb_rqd, l0_min);
   const l0_phi = l0 / barDia;
 
   report.addStep({
@@ -118,7 +131,7 @@ export function calculateAnchorageLapEC2(params) {
   report.addStep({
     ref: 'Cl 8.7.3',
     description: 'Design Lap Length l0',
-    formula: 'l_0 = \\alpha_6 l_{bd} \\ge l_{0,min}',
+    formula: 'l_0 = \\alpha_1 \\alpha_2 \\alpha_3 \\alpha_5 \\alpha_6 l_{b,rqd} \\ge l_{0,min}',
     values: `\\alpha_6 = ${a6.toFixed(2)}, l_{0,min} = ${l0_min.toFixed(1)} mm \\rightarrow l_0 = ${l0.toFixed(1)} mm (${l0_phi.toFixed(1)} \\phi)`
   });
 
@@ -153,7 +166,8 @@ export function calculateAnchorageLapBS8110(params) {
     barDia = 16,
     fcu = 30,
     fy = 500,
-    forceType = 'tension' // 'tension' or 'compression'
+    forceType = 'tension', // 'tension' or 'compression'
+    barType = 'type2'      // 'type2' deformed (B500), 'type1' deformed, or 'plain' (BS 8110 Table 3.26)
   } = params;
 
   const errors = [];
@@ -166,8 +180,12 @@ export function calculateAnchorageLapBS8110(params) {
   if (!fcuCheck.valid) errors.push(fcuCheck.error);
   const fyCheck = Validate.steelStrength(fy, 'Steel yield strength fy');
   if (!fyCheck.valid) errors.push(fyCheck.error);
+  if (forceType !== 'tension' && forceType !== 'compression') errors.push(`Force type must be "tension" or "compression" (got "${forceType}").`);
+  const BETA = { type2: [0.50, 0.63], type1: [0.40, 0.50], plain: [0.28, 0.35] };
+  if (!BETA[barType]) errors.push(`Bar type must be type2, type1 or plain (got "${barType}").`);
 
   warnings.push('Scope: Standard straight tension and compression anchorage and lap lengths to BS 8110-1:1997 Cl 3.12.8.');
+  warnings.push(`Bond coefficient β from BS 8110 Table 3.26 for ${barType === 'plain' ? 'plain bars' : barType === 'type1' ? 'type 1 deformed bars' : 'type 2 deformed bars (standard high-yield ribbed bar)'}.`);
 
   const report = new CalculationReport({
     title: 'Anchorage & Lap Length to BS 8110-1:1997',
@@ -181,18 +199,20 @@ export function calculateAnchorageLapBS8110(params) {
 
   // Cl 3.12.8.4: fcu <= 40 for bond calculation
   const fcu_eff = Math.min(fcu, 40);
-  const beta = forceType === 'tension' ? 0.50 : 0.63;
+  const beta = BETA[barType][forceType === 'tension' ? 0 : 1];
   const fbu = beta * Math.sqrt(fcu_eff);
 
   const fs = 0.87 * fy;
   const anchorage = (fs * barDia) / (4 * fbu);
   const anchorage_phi = anchorage / barDia;
 
-  // Laps: 1.0x, 1.4x, 2.0x
+  // Tension laps (Cl 3.12.8.13): 1.0x, 1.4x (top bars or small cover), 2.0x (both).
+  // Compression laps (Cl 3.12.8.15): 1.25 x the compression anchorage length; the 1.4/2.0 factors do not apply.
   const lap_min = Math.max(15 * barDia, 300);
-  const lap_1_0 = Math.max(1.0 * anchorage, lap_min);
-  const lap_1_4 = Math.max(1.4 * anchorage, lap_min);
-  const lap_2_0 = Math.max(2.0 * anchorage, lap_min);
+  const isComp = forceType === 'compression';
+  const lap_1_0 = Math.max((isComp ? 1.25 : 1.0) * anchorage, lap_min);
+  const lap_1_4 = isComp ? lap_1_0 : Math.max(1.4 * anchorage, lap_min);
+  const lap_2_0 = isComp ? lap_1_0 : Math.max(2.0 * anchorage, lap_min);
 
   report.addStep({
     ref: 'Cl 3.12.8.4',
@@ -209,10 +229,12 @@ export function calculateAnchorageLapBS8110(params) {
   });
 
   report.addStep({
-    ref: 'Cl 3.12.8.11',
-    description: 'Tension Lap Lengths',
-    formula: 'l_{lap} = \\text{factor} \\times l \\ge \\max(15\\phi, 300\\text{ mm})',
-    values: `Normal (1.0x) = ${lap_1_0.toFixed(1)} mm, Top/Min-cover (1.4x) = ${lap_1_4.toFixed(1)} mm, Both (2.0x) = ${lap_2_0.toFixed(1)} mm`
+    ref: isComp ? 'Cl 3.12.8.15' : 'Cl 3.12.8.13',
+    description: isComp ? 'Compression Lap Length' : 'Tension Lap Lengths',
+    formula: isComp ? 'l_{lap} = 1.25 \\times l \\ge \\max(15\\phi, 300\\text{ mm})' : 'l_{lap} = \\text{factor} \\times l \\ge \\max(15\\phi, 300\\text{ mm})',
+    values: isComp
+      ? `Compression lap (1.25x) = ${lap_1_0.toFixed(1)} mm`
+      : `Normal (1.0x) = ${lap_1_0.toFixed(1)} mm, Top/Min-cover (1.4x) = ${lap_1_4.toFixed(1)} mm, Both (2.0x) = ${lap_2_0.toFixed(1)} mm`
   });
 
   return {
@@ -221,6 +243,7 @@ export function calculateAnchorageLapBS8110(params) {
     fcu_eff,
     fy,
     forceType,
+    barType,
     beta,
     fbu,
     fs,

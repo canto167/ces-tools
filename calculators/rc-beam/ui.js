@@ -30,10 +30,10 @@ const EXAMPLES = {
     bars_n: 4,
     bars_dia: 20,
     top_bars_n: 2,
-    top_bars_dia: 16,
-    link_dia: 10,
+    top_bars_dia: 12,
+    link_dia: 8,
     link_legs: 2,
-    link_spacing: 150
+    link_spacing: 300
   },
   BS8110: {
     code: 'BS8110',
@@ -52,9 +52,9 @@ const EXAMPLES = {
     bars_dia: 20,
     top_bars_n: 2,
     top_bars_dia: 16,
-    link_dia: 10,
+    link_dia: 8,
     link_legs: 2,
-    link_spacing: 150
+    link_spacing: 300
   }
 };
 

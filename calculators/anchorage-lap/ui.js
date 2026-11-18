@@ -233,6 +233,17 @@ function renderResults(res, isEC2, ec2Res, bsRes) {
           <div class="value">${res.fbd.toFixed(2)} <span style="font-size: 13px;">N/mm²</span></div>
         </div>
       `;
+    } else if (res.forceType === 'compression') {
+      summaryBox.innerHTML = `
+        <div class="summary-item">
+          <div class="label">Compression Anchorage Length</div>
+          <div class="value">${res.anchorage.toFixed(1)} <span style="font-size: 13px;">mm (${res.anchorage_phi.toFixed(1)}φ)</span></div>
+        </div>
+        <div class="summary-item">
+          <div class="label">Compression Lap (1.25x)</div>
+          <div class="value">${res.lap_1_0.toFixed(1)} <span style="font-size: 13px;">mm (${res.lap_1_0_phi.toFixed(1)}φ)</span></div>
+        </div>
+      `;
     } else {
       summaryBox.innerHTML = `
         <div class="summary-item">
@@ -259,10 +270,10 @@ function renderResults(res, isEC2, ec2Res, bsRes) {
   if (stepsContainer && res.report) {
     stepsContainer.innerHTML = res.report.steps.map((st, i) => `
       <tr>
-        <td style="font-weight: 600;">${i + 1}. ${st.description}</td>
-        <td class="code-cell">${st.formula || '—'}</td>
-        <td class="code-cell">${st.values || '—'}</td>
-        <td class="code-cell" style="color: var(--text-muted);">${st.ref || '—'}</td>
+        <td style="font-weight: 600;">${i + 1}. ${st.label}</td>
+        <td class="code-cell">${st.equation || '—'}</td>
+        <td class="code-cell">${st.substituted || '—'}</td>
+        <td class="code-cell" style="color: var(--text-muted);">${st.clause || '—'}</td>
       </tr>
     `).join('');
   }

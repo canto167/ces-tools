@@ -242,8 +242,9 @@ export function calculatePunchingShear(input) {
     capacity: vRd_c,
     clause: 'EN 1992-1-1 Cl 6.4.4',
     unit: 'N/mm²',
+    status: needsLinks ? 'WARN' : 'PASS',
     message: needsLinks
-      ? 'vEd,1 > vRd,c: Shear reinforcement (links or studs) REQUIRED.'
+      ? 'vEd,1 > vRd,c: concrete alone is not enough, so punching shear reinforcement (links or studs) is REQUIRED. It is designed in the steps below (EN 1992-1-1 Cl 6.4.5). If vEd,1 is more than about 2 vRd,c (UK National Annex limit), increase the slab depth instead.'
       : 'vEd,1 ≤ vRd,c: Concrete alone is adequate; no punching links required.'
   });
 

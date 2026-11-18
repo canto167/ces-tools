@@ -55,6 +55,12 @@ export function calculateShortColumn(params) {
 
   const steelCheck = Validate.steelStrength(fy, 'Column steel yield strength');
   if (!steelCheck.valid) errors.push(steelCheck.error);
+  [['Top end condition', topEnd], ['Bottom end condition', bottomEnd]].forEach(([name, v]) => {
+    if (![1, 2, 3].includes(Number(v))) errors.push(`${name} must be 1, 2 or 3 (BS 8110 Cl 3.8.1.6), got ${v}.`);
+  });
+  if (k !== 0.70 && k !== 0.75) errors.push(`Steel stress factor k must be 0.70 or 0.75 (got ${k}).`);
+  if (!Validate.isNumber(barCount) || barCount < 4 || barCount % 2 !== 0) errors.push(`Number of bars must be an even number of at least 4 (got ${barCount}).`);
+  if (!Validate.isNumber(barDiam) || barDiam < 12 || barDiam > 40) errors.push(`Bar diameter must be between 12 and 40 mm (got ${barDiam}).`);
 
   warnings.push('Scope: Short braced axial column checker (BS 8110 Cl 3.8.4.3). Predominantly axial loading with nominal eccentricity (e_min = 0.05h <= 20mm). Excludes slender columns and significant applied moments.');
 

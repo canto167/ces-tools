@@ -6,6 +6,8 @@
   <title>RC Rectangular Beam Designer (EC2 & BS 8110) — Civil Engineer Society</title>
   <link rel="stylesheet" href="../../shared/css/base.css">
   <link rel="stylesheet" href="../../shared/css/print.css">
+  <meta name="googlebot" content="noindex, indexifembedded">
+  <meta name="robots" content="noindex, follow">
 </head>
 <body>
   <!-- Print Header for PDF / Print Output -->
@@ -38,6 +40,7 @@
         </div>
       </div>
       <div class="ces-header-actions">
+        <a id="btnFullScreen" class="btn" href="./" target="_blank" rel="noopener" style="display:none;">Open full screen</a>
         <button type="button" id="btnLoadExample" class="btn">Load Example</button>
         <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
         <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
@@ -260,12 +263,13 @@
         </div>
 
         <!-- Related Guides -->
-        <div class="card no-print" style="background: var(--color-blue-light); border-color: var(--color-blue);">
-          <div class="card-title" style="color: var(--color-blue); font-size: 14px;">Related Guides & Worked Examples</div>
+        <div class="card no-print ces-related" style="background: var(--color-blue-light); border-color: var(--color-blue);">
+          <div class="card-title" style="color: var(--color-blue); font-size: 14px;">Related Guides &amp; Worked Examples</div>
           <ul style="font-size: 13px; padding-left: 20px; line-height: 1.6;">
-            <li><a href="#guide-ec2-beam-flexure" style="color: var(--color-blue); font-weight: 600;">How to Design RC Beams to Eurocode 2: Singly vs Doubly Reinforced</a></li>
-            <li><a href="#guide-bs8110-beam-deflection" style="color: var(--color-blue); font-weight: 600;">Span-to-Depth Ratio Deflection Checks Explained (BS 8110 Table 3.9/3.10)</a></li>
-            <li><a href="#guide-shear-links-ec2" style="color: var(--color-blue); font-weight: 600;">Eurocode 2 Variable Strut Angle Shear Design: Understanding cot θ = 2.5</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/rc-beam-design-eurocode-2.html" target="_top" style="color: var(--color-blue); font-weight: 600;">RC Beam Design to Eurocode 2: Worked Example</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/rc-beam-design-bs-8110.html" target="_top" style="color: var(--color-blue); font-weight: 600;">RC Beam Design to BS 8110: Worked Example</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/beam-deflection-formulas.html" target="_top" style="color: var(--color-blue); font-weight: 600;">Beam Deflection Formulas</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/concrete-cover-requirements.html" target="_top" style="color: var(--color-blue); font-weight: 600;">Concrete Cover Requirements</a></li>
           </ul>
         </div>
       </div>
@@ -280,7 +284,7 @@
     <!-- Screen Disclaimer -->
     <div class="ces-disclaimer no-print">
       <strong>Engineering Disclaimer:</strong> This free calculation tool is provided for educational and preliminary design verification purposes. The author and Civil Engineer Society accept no liability for decisions made using this application. Designs must be reviewed by a certified Professional Engineer prior to construction.
-    </div>
+     BS 8110 and BS 8002 have been withdrawn and replaced by Eurocodes; BS 8110 results are for checking and preliminary design.</div>
   </div>
 
   <script type="module">
@@ -289,6 +293,9 @@
       document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
       initRcBeamUI();
     });
+  </script>
+  <script>
+    if (window.self !== window.top) { var fs = document.getElementById('btnFullScreen'); if (fs) fs.style.display = ''; }
   </script>
 </body>
 </html>

@@ -20,6 +20,9 @@ export function calculateBeam(params) {
   const errors = [];
   const warnings = [];
 
+  const validSupports = ['simply_supported', 'cantilever', 'fixed_fixed', 'propped_cantilever'];
+  if (!validSupports.includes(supportType)) errors.push(`Invalid support type "${supportType}". Supported types: ${validSupports.join(', ')}.`);
+  if (!Array.isArray(pointLoads) || !Array.isArray(distributedLoads)) errors.push('Point loads and distributed loads must be lists.');
   if (!Validate.isNumber(L) || L <= 0) errors.push(`Beam span L must be greater than 0 m (got ${L}).`);
   if (!Validate.isNumber(E) || E <= 0) errors.push(`Modulus of elasticity E must be greater than 0 MPa (got ${E}).`);
   if (!Validate.isNumber(I) || I <= 0) errors.push(`Second moment of area I must be greater than 0 mm⁴ (got ${I}).`);

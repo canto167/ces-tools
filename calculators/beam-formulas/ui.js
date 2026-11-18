@@ -19,8 +19,8 @@ const EXAMPLE = {
   x2: 6.0,
   P: 0,
   a: 3.0,
-  E: 200000,
-  I_cm4: 10000 // 1.0e8 mm4 = 10,000 cm4
+  E: 210000,
+  I_cm4: 9510 // 95.1e6 mm4: the steel beam example in the beam deflection formulas post
 };
 
 let currentInputs = { ...EXAMPLE };
@@ -216,10 +216,10 @@ function renderResults(res) {
   if (stepsContainer && res.report) {
     stepsContainer.innerHTML = res.report.steps.map((st, i) => `
       <tr>
-        <td style="font-weight: 600;">${i + 1}. ${st.description}</td>
-        <td class="code-cell">${st.formula || '—'}</td>
-        <td class="code-cell">${st.values || '—'}</td>
-        <td class="code-cell" style="color: var(--text-muted);">${st.ref || '—'}</td>
+        <td style="font-weight: 600;">${i + 1}. ${st.label}</td>
+        <td class="code-cell">${st.equation || '—'}</td>
+        <td class="code-cell">${st.substituted || '—'}</td>
+        <td class="code-cell" style="color: var(--text-muted);">${st.clause || '—'}</td>
       </tr>
     `).join('');
   }

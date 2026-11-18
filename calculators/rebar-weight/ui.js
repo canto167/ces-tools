@@ -120,8 +120,19 @@ function renderScheduleTable(result) {
   const tbody = document.getElementById('scheduleTableBody');
   if (!tbody) return;
 
+  const errBox = document.getElementById('scheduleErrors') || (() => {
+    const el = document.createElement('div');
+    el.id = 'scheduleErrors';
+    el.setAttribute('role', 'alert');
+    el.style.cssText = 'color:#b91c1c;font-size:13px;margin-top:8px;';
+    const table = tbody.closest('table');
+    if (table && table.parentNode) table.parentNode.insertBefore(el, table.nextSibling);
+    return el;
+  })();
+  errBox.innerHTML = (result.errors || []).map(e => `<div>⚠ ${e}</div>`).join('');
+
   tbody.innerHTML = result.rows.map(row => `
-    <tr>
+    <tr${row.invalid ? ' style="background:#fef2f2;" title="This row has invalid values and is left out of the totals"' : ''}>
       <td>
         <input type="text" class="form-input form-input-sm" value="${row.mark}" style="width:70px;" onchange="window.cesUpdateRow(${row.id}, 'mark', this.value)" />
       </td>

@@ -47,9 +47,16 @@ export function calculateRcBeam(input) {
   const fy = fyk;
   const fywk = input && input.fywk !== undefined ? Number(input.fywk) : (input && input.fyv !== undefined ? Number(input.fyv) : 500);
   const fyv = fywk;
-  const acc = input && input.acc !== undefined ? Number(input.acc) : 1.0; // National Annex parameter for EC2
+  // EC2 alpha_cc: UK and Malaysian National Annex value 0.85 (EN recommended 1.0).
+  const acc = input && input.acc !== undefined ? Number(input.acc) : 0.85;
 
   // Validation
+  if (code !== 'EC2' && code !== 'BS8110') {
+    errors.push(`Invalid design code "${code}". Use EC2 or BS8110.`);
+  }
+  if (code === 'EC2' && (!Validate.isNumber(acc) || acc < 0.8 || acc > 1.0)) {
+    errors.push(`alpha_cc must be between 0.80 and 1.00 (got ${acc}).`);
+  }
   if (!Validate.isNumber(b) || b < 100) errors.push(`Beam width b must be at least 100 mm (got ${b}).`);
   if (!Validate.isNumber(h) || h < 150) errors.push(`Beam depth h must be at least 150 mm (got ${h}).`);
   const coverCheck = Validate.coverSanity(cover, b, h);
@@ -103,6 +110,12 @@ export function calculateRcBeam(input) {
     const gap = Math.max(layer.dia, 25);
     currentDistFromBottom += layer.dia + gap;
   });
+
+  for (const layer of tensionLayers) {
+    if (!Validate.isNumber(Number(layer.n)) || Number(layer.n) < 1 || !Validate.isNumber(Number(layer.dia)) || Number(layer.dia) <= 0) {
+      return { ok: false, errors: ['Each tension layer needs at least 1 bar and a bar diameter greater than 0.'], warnings, results, checks: [], steps: [] };
+    }
+  }
 
   const tensionCentroidY = totalAsProv > 0 ? sumAy / totalAsProv : (cover + link_dia + primaryDia / 2);
   const d = h - tensionCentroidY;
@@ -162,23 +175,31 @@ export function calculateRcBeam(input) {
     const fcd = (acc * fck) / 1.5;
     const fyd = fyk / 1.15;
     K = (M * 1e6) / (b * d * d * fck);
-    K_prime = 0.167; // standard redistribution ratio delta = 1.0
+    // Rectangular stress block (lambda = 0.8, eta = 1.0), x/d <= 0.45 (no redistribution).
+    // K' = 0.167 at acc = 0.85 (standard rounded value), scaled linearly with acc; z = d[0.5 + sqrt(0.25 - 0.75K/acc)].
+    K_prime = 0.167 * acc / 0.85;
+    const zFactor = 0.75 / acc;
 
     results.K = K;
     results.K_prime = K_prime;
 
     if (K <= K_prime) {
       // Singly reinforced
-      z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 1.134)));
+      z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - zFactor * K)));
       z = Math.min(z, 0.95 * d);
       As_req = (M * 1e6) / (fyd * z);
     } else {
       // Doubly reinforced
       isDoublyReinforced = true;
-      z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K_prime / 1.134)));
+      z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - zFactor * K_prime)));
       z = Math.min(z, 0.95 * d);
-      As2_req = ((K - K_prime) * fck * b * d * d) / (fyd * (d - d2));
-      As_req = ((K_prime * fck * b * d * d) / (fyd * z)) + As2_req;
+      const fsc = compressionSteelStress(d, z, d2, fyd, 0.4, warnings, 'EN 1992-1-1 Cl 3.1.7 / 6.1');
+      if (fsc === null) {
+        return { ok: false, errors: ['Compression steel lies at or below the neutral axis; increase the section depth.'], warnings, results, checks: [], steps: [] };
+      }
+      results.fsc = fsc;
+      As2_req = ((K - K_prime) * fck * b * d * d) / (fsc * (d - d2));
+      As_req = ((K_prime * fck * b * d * d) / (fyd * z)) + As2_req * fsc / fyd;
     }
 
     // Minimum and Maximum longitudinal steel
@@ -202,8 +223,8 @@ export function calculateRcBeam(input) {
 
     report.addStep({
       label: 'Lever Arm z',
-      equation: 'z = d * [0.5 + √(0.25 - K / 1.134)] ≤ 0.95d',
-      substituted: `${d.toFixed(1)} * [0.5 + √(0.25 - ${(isDoublyReinforced ? K_prime : K).toFixed(4)} / 1.134)]`,
+      equation: 'z = d * [0.5 + √(0.25 - 0.75K / αcc)] ≤ 0.95d',
+      substituted: `${d.toFixed(1)} * [0.5 + √(0.25 - 0.75 * ${(isDoublyReinforced ? K_prime : K).toFixed(4)} / ${acc})]`,
       value: z,
       unit: 'mm',
       clause: 'EN 1992-1-1 Cl 6.1'
@@ -212,16 +233,16 @@ export function calculateRcBeam(input) {
     if (isDoublyReinforced) {
       report.addStep({
         label: 'Compression Steel Req. As2',
-        equation: 'As2 = (K - K\') * fck * b * d² / [fyd * (d - d2)]',
-        substituted: `(${K.toFixed(4)} - ${K_prime}) * ${fck} * ${b} * ${d.toFixed(1)}² / [${fyd.toFixed(2)} * (${d.toFixed(1)} - ${d2})]`,
+        equation: 'As2 = (K - K\') * fck * b * d² / [fsc * (d - d2)]',
+        substituted: `(${K.toFixed(4)} - ${K_prime.toFixed(4)}) * ${fck} * ${b} * ${d.toFixed(1)}² / [${results.fsc.toFixed(2)} * (${d.toFixed(1)} - ${d2})]`,
         value: As2_req,
         unit: 'mm²',
         clause: 'EN 1992-1-1 Cl 6.1'
       });
       report.addStep({
         label: 'Total Tension Steel Req. As1',
-        equation: 'As1 = K\' * fck * b * d² / (fyd * z) + As2',
-        substituted: `${K_prime} * ${fck} * ${b} * ${d.toFixed(1)}² / [${fyd.toFixed(2)} * ${z.toFixed(1)}] + ${As2_req.toFixed(1)}`,
+        equation: 'As1 = K\' * fck * b * d² / (fyd * z) + As2 * fsc / fyd',
+        substituted: `${K_prime.toFixed(4)} * ${fck} * ${b} * ${d.toFixed(1)}² / [${fyd.toFixed(2)} * ${z.toFixed(1)}] + ${As2_req.toFixed(1)}`,
         value: As_req,
         unit: 'mm²',
         clause: 'EN 1992-1-1 Cl 6.1'
@@ -280,7 +301,11 @@ export function calculateRcBeam(input) {
     const VRd_max = (b * z_shear * nu1 * fcd_shear / (2.5 + 0.4)) * 1e-3; // kN
 
     const k_shear = Math.min(1.0 + Math.sqrt(200.0 / d), 2.0);
-    const rho_l = Math.min(totalAsProv / (b * d), 0.02);
+    const rho_l_raw = totalAsProv / (b * d);
+    const rho_l = Math.min(rho_l_raw, 0.02);
+    if (rho_l_raw > 0.02) {
+      warnings.push(`Shear: ρl = ${rho_l_raw.toFixed(4)} exceeds 0.02, so VRd,c uses the code limit ρl = 0.02 (EN 1992-1-1 Cl 6.2.2(1)).`);
+    }
     const VRd_c = Math.max(
       0.12 * k_shear * Math.pow(100.0 * rho_l * fck, 1 / 3),
       0.035 * Math.pow(k_shear, 1.5) * Math.sqrt(fck)
@@ -356,7 +381,7 @@ export function calculateRcBeam(input) {
 
     // 5. Deflection (EC2 Cl 7.4.2 Eq 7.16)
     const rho0 = Math.sqrt(fck) * 1e-3;
-    const rho = As_req / (b * d);
+    const rho = Math.max(As_req, As_min) / (b * d);
     const rho_prime = As2_req / (b * d);
 
     let ld_basic = 0;
@@ -372,7 +397,8 @@ export function calculateRcBeam(input) {
     else if (support === 'cantilever') Ks = 0.4;
 
     const spanMod = L > 7.0 ? 7.0 / L : 1.0;
-    const steelMod = Math.min(totalAsProv / As_req, 1.5);
+    // 310/σs = (500/fyk)(As,prov/As,req) <= 1.5 (EN 1992-1-1 Eq 7.17, UK NA limit 1.5)
+    const steelMod = Math.min((500 / fyk) * totalAsProv / Math.max(As_req, As_min), 1.5);
     const ld_allowable = Ks * ld_basic * steelMod * spanMod;
     const ld_actual = (L * 1000.0) / d;
 
@@ -390,7 +416,7 @@ export function calculateRcBeam(input) {
 
     report.addStep({
       label: 'Allowable Span / Effective Depth (l/d)allow',
-      equation: '(l/d)basic * min(As,prov / As,req, 1.5) * (7/L if L>7m)',
+      equation: '(l/d)basic * min[(500/fyk)(As,prov / As,req), 1.5] * (7/L if L>7m)',
       substituted: `${(Ks * ld_basic).toFixed(2)} * ${steelMod.toFixed(3)} * ${spanMod.toFixed(3)}`,
       value: ld_allowable,
       clause: 'EN 1992-1-1 Cl 7.4.2'
@@ -422,11 +448,17 @@ export function calculateRcBeam(input) {
       isDoublyReinforced = true;
       z = d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K_prime / 0.9)));
       z = Math.min(z, 0.95 * d);
-      As2_req = ((K - K_prime) * fcu * b * d * d) / (0.87 * fy * (d - d2));
-      As_req = ((K_prime * fcu * b * d * d) / (0.87 * fy * z)) + As2_req;
+      const fsc = compressionSteelStress(d, z, d2, 0.87 * fy, 0.45, warnings, "BS 8110 Cl 3.4.4.4, d'/x limit");
+      if (fsc === null) {
+        return { ok: false, errors: ['Compression steel lies at or below the neutral axis; increase the section depth.'], warnings, results, checks: [], steps: [] };
+      }
+      results.fsc = fsc;
+      As2_req = ((K - K_prime) * fcu * b * d * d) / (fsc * (d - d2));
+      As_req = ((K_prime * fcu * b * d * d) / (0.87 * fy * z)) + As2_req * fsc / (0.87 * fy);
     }
 
-    const As_min = 0.0013 * b * h;
+    // BS 8110 Table 3.25: 0.24% for fy = 250, 0.13% for fy = 460/500
+    const As_min = (fy < 460 ? 0.0024 : 0.0013) * b * h;
     const As_max = 0.04 * b * h;
 
     results.z = z;
@@ -455,8 +487,8 @@ export function calculateRcBeam(input) {
     if (isDoublyReinforced) {
       report.addStep({
         label: 'Compression Steel Req. As\'',
-        equation: 'As\' = (K - K\') * fcu * b * d² / [0.87 * fy * (d - d2)]',
-        substituted: `(${K.toFixed(4)} - ${K_prime}) * ${fcu} * ${b} * ${d.toFixed(1)}² / [${(0.87 * fy).toFixed(1)} * (${d.toFixed(1)} - ${d2})]`,
+        equation: 'As\' = (K - K\') * fcu * b * d² / [fsc * (d - d2)]',
+        substituted: `(${K.toFixed(4)} - ${K_prime}) * ${fcu} * ${b} * ${d.toFixed(1)}² / [${results.fsc.toFixed(1)} * (${d.toFixed(1)} - ${d2})]`,
         value: As2_req,
         unit: 'mm²',
         clause: 'BS 8110 Cl 3.4.4.4'
@@ -491,7 +523,7 @@ export function calculateRcBeam(input) {
     }
 
     report.addCheck({
-      name: 'Minimum Reinforcement (0.13% bh)',
+      name: `Minimum Reinforcement (${fy < 460 ? '0.24' : '0.13'}% bh)`,
       demand: As_min,
       capacity: totalAsProv,
       clause: 'BS 8110 Cl 3.12.5.3',
@@ -501,7 +533,10 @@ export function calculateRcBeam(input) {
     // Shear BS 8110 Cl 3.4.5
     const v = (V * 1e3) / (b * d);
     const v_max = Math.min(0.8 * Math.sqrt(fcu), 5.0);
-    const p_prov = Math.min((100.0 * totalAsProv) / (b * d), 3.0);
+    const p_raw = (100.0 * totalAsProv) / (b * d);
+    const p_prov = Math.min(p_raw, 3.0);
+    if (p_raw > 3.0) warnings.push(`Shear: 100As/bd = ${p_raw.toFixed(2)} exceeds 3, so vc uses the Table 3.8 limit of 3.`);
+    if (fcu > 40) warnings.push('Shear: fcu is limited to 40 N/mm² when calculating vc (BS 8110 Table 3.8 note).');
     const f_d = Math.max(Math.pow(400.0 / d, 0.25), 0.67);
     const f_cu = Math.pow(Math.min(fcu, 40.0) / 25.0, 1 / 3);
     const vc = (0.79 / 1.25) * Math.pow(p_prov, 1 / 3) * f_d * f_cu;
@@ -581,7 +616,7 @@ export function calculateRcBeam(input) {
     if (support === 'cantilever') basicLd = 7.0;
     else if (support === 'end_span' || support === 'interior_span') basicLd = 26.0;
 
-    const fs = (2.0 * fy * As_req) / (3.0 * totalAsProv);
+    const fs = (2.0 * fy * Math.max(As_req, As_min)) / (3.0 * totalAsProv);
     const M_bd2 = (M * 1e6) / (b * d * d);
     const MFt = Math.min(2.0, 0.55 + (477.0 - fs) / (120.0 * (0.9 + M_bd2)));
 
@@ -641,4 +676,21 @@ export function calculateRcBeam(input) {
     checks: report.getChecks(),
     steps: report.getSteps()
   };
+}
+
+/**
+ * Stress in the compression steel at the ultimate limit state.
+ * Neutral axis from the lever arm: x = (d - z) / k, with k = 0.4 (EC2, lambda/2) or 0.45 (BS 8110).
+ * Strain at the compression steel = 0.0035 (1 - d2 / x); stress = min(fyd, Es * strain), Es = 200 kN/mm².
+ * Returns null if the compression steel is at or below the neutral axis.
+ */
+function compressionSteelStress(d, z, d2, fyd, k, warnings, clause) {
+  const x = (d - z) / k;
+  const strain = 0.0035 * (1 - d2 / x);
+  const fsc = Math.min(fyd, 200000 * strain);
+  if (fsc <= 0) return null;
+  if (fsc < fyd) {
+    warnings.push(`Compression steel does not yield: d2/x = ${(d2 / x).toFixed(3)}, so fsc = ${fsc.toFixed(1)} N/mm² is used instead of ${fyd.toFixed(1)} N/mm² (${clause}).`);
+  }
+  return fsc;
 }

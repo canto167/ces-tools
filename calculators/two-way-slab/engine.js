@@ -61,6 +61,8 @@ export function calculateTwoWaySlab(input) {
   const fcu = input && input.fcu !== undefined ? Number(input.fcu) : 30;
   const fy = input && input.fy !== undefined ? Number(input.fy) : 500;
 
+  if (!Validate.isNumber(finishes) || finishes < 0) errors.push('Finishes load must be 0 or positive.');
+  if (!Validate.isNumber(qk) || qk < 0) errors.push('Imposed load qk must be 0 or positive.');
   if (!Validate.isNumber(lx) || lx <= 0) errors.push('Short span lx must be greater than 0.');
   if (!Validate.isNumber(ly) || ly <= 0) errors.push('Long span ly must be greater than 0.');
   if (lx > ly) errors.push('lx must be the shorter span (lx ≤ ly).');
@@ -125,13 +127,13 @@ export function calculateTwoWaySlab(input) {
   const zy = Math.min(dy * (0.5 + Math.sqrt(Math.max(0, 0.25 - Ky / 0.9))), 0.95 * dy);
   const Asy = (msy * 1e6) / (0.87 * fy * zy);
 
-  const As_min = 0.0013 * b * h;
+  const As_min = (fy < 460 ? 0.0024 : 0.0013) * b * h; // BS 8110 Table 3.25
   const Apx = Bars.areaPerMetre(dia, sx);
   const Apy = Bars.areaPerMetre(dia, sy);
 
   // Deflection on short span
   const basicLd = 20.0;
-  const fs = (2.0 * fy * Asx) / (3.0 * Apx);
+  const fs = (2.0 * fy * Math.max(Asx, As_min)) / (3.0 * Apx);
   const M_bd2 = (msx * 1e6) / (b * dx * dx);
   const MF = Math.min(2.0, 0.55 + (477.0 - fs) / (120.0 * (0.9 + M_bd2)));
   const allowableLd = basicLd * MF;

@@ -31,6 +31,9 @@ export function calculateOneWaySlab(input) {
   const fy = fyk;
 
   // Validation
+  if (code !== 'EC2' && code !== 'BS8110') errors.push(`Invalid design code "${code}". Use EC2 or BS8110.`);
+  if (!Validate.isNumber(finishes) || finishes < 0) errors.push('Finishes load must be 0 or positive.');
+  if (!Validate.isNumber(qk) || qk < 0) errors.push('Imposed load qk must be 0 or positive.');
   if (!Validate.isNumber(L) || L <= 0) errors.push('Span length L must be greater than 0.');
   if (!Validate.isNumber(h) || h < 75) errors.push(`Slab overall depth h must be at least 75 mm (got ${h}).`);
   const coverCheck = Validate.coverSanity(cover, 1000, h);
@@ -160,7 +163,11 @@ export function calculateOneWaySlab(input) {
 
     // Shear EC2
     const k_shear = Math.min(1.0 + Math.sqrt(200.0 / d), 2.0);
-    const rho_l = Math.min(As_prov / (b * d), 0.02);
+    const rho_l_raw = As_prov / (b * d);
+    const rho_l = Math.min(rho_l_raw, 0.02);
+    if (rho_l_raw > 0.02) {
+      warnings.push(`Shear: ρl = ${rho_l_raw.toFixed(4)} exceeds 0.02, so VRd,c uses the code limit ρl = 0.02 (EN 1992-1-1 Cl 6.2.2(1)).`);
+    }
     const v_calc = 0.12 * k_shear * Math.pow(100.0 * rho_l * fck, 1 / 3);
     const v_min = 0.035 * Math.pow(k_shear, 1.5) * Math.sqrt(fck);
     const v_Rd_c = Math.max(v_calc, v_min);
@@ -168,7 +175,7 @@ export function calculateOneWaySlab(input) {
 
     // Deflection EC2 Eq 7.16
     const rho0 = Math.sqrt(fck) * 1e-3;
-    const rho = As_req / (b * d);
+    const rho = Math.max(As_req, As_min) / (b * d);
     let ld_basic = 0;
     if (rho <= rho0) {
       ld_basic = 11.0 + 1.5 * Math.sqrt(fck) * (rho0 / rho) + 3.2 * Math.sqrt(fck) * Math.pow(Math.max(0, (rho0 / rho) - 1.0), 1.5);
@@ -181,7 +188,8 @@ export function calculateOneWaySlab(input) {
     else if (support === 'interior_span') Ks = 1.5;
 
     const spanMod = L > 7.0 ? 7.0 / L : 1.0;
-    const steelMod = Math.min(As_prov / As_req, 1.5);
+    // 310/σs = (500/fyk)(As,prov/As,req) <= 1.5 (EN 1992-1-1 Eq 7.17, UK NA limit 1.5)
+    const steelMod = Math.min((500 / fyk) * As_prov / Math.max(As_req, As_min), 1.5);
     const ld_allowable = Ks * ld_basic * steelMod * spanMod;
     const ld_actual = (L * 1000.0) / d;
 
@@ -260,13 +268,15 @@ export function calculateOneWaySlab(input) {
 
     z = Math.min(d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 0.9))), 0.95 * d);
     As_req = (M * 1e6) / (0.87 * fy * z);
-    As_min = 0.0013 * b * h;
+    As_min = (fy < 460 ? 0.0024 : 0.0013) * b * h; // BS 8110 Table 3.25
 
     const s_max_main = Math.min(3 * d, 750);
 
     // Shear BS 8110
     const v = (V * 1e3) / (b * d);
-    const p_prov = Math.min((100.0 * As_prov) / (b * d), 3.0);
+    const p_raw = (100.0 * As_prov) / (b * d);
+    const p_prov = Math.min(p_raw, 3.0);
+    if (p_raw > 3.0) warnings.push(`Shear: 100As/bd = ${p_raw.toFixed(2)} exceeds 3, so vc uses the Table 3.8 limit of 3.`);
     const f_d = Math.max(Math.pow(400.0 / d, 0.25), 1.0); // >= 1.0 for slabs without links
     const f_cu = Math.pow(Math.min(fcu, 40.0) / 25.0, 1 / 3);
     const vc = (0.79 / 1.25) * Math.pow(p_prov, 1 / 3) * f_d * f_cu;
@@ -275,7 +285,7 @@ export function calculateOneWaySlab(input) {
     let basicLd = 20.0;
     if (support === 'end_span' || support === 'interior_span') basicLd = 26.0;
 
-    const fs = (2.0 * fy * As_req) / (3.0 * As_prov);
+    const fs = (2.0 * fy * Math.max(As_req, As_min)) / (3.0 * As_prov);
     const M_bd2 = (M * 1e6) / (b * d * d);
     const MF = Math.min(2.0, 0.55 + (477.0 - fs) / (120.0 * (0.9 + M_bd2)));
     const allowableLd = basicLd * MF;

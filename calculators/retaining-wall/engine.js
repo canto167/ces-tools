@@ -185,7 +185,7 @@ export function calculateRetainingWall(params) {
   );
 
   const As_req = (Mu * 1e6) / (0.87 * fy * z_stem); // mm2/m
-  const As_min = 0.0013 * b_strip * (t_stem * 1000); // 0.13% bh
+  const As_min = (fy < 460 ? 0.0024 : 0.0013) * b_strip * (t_stem * 1000); // BS 8110 Table 3.25: 0.24% (fy 250) or 0.13% bh
   const As_gov_req = Math.max(As_req, As_min);
 
   const singleBarArea = (Math.PI * barDia * barDia) / 4;

@@ -208,23 +208,16 @@ function renderResults(out) {
   }
 
   if (container && out.report) {
-    container.innerHTML = out.report.checks.map(c => UIKit.renderStatusCard({
-      title: c.title,
-      clause: c.clause,
-      actual: `${typeof c.actual === 'number' ? c.actual.toFixed(1) : c.actual} ${c.unit || ''}`,
-      allowable: `${typeof c.allowable === 'number' ? c.allowable.toFixed(1) : c.allowable} ${c.unit || ''}`,
-      ratio: c.ratio,
-      pass: c.pass
-    })).join('');
+    container.innerHTML = out.report.checks.map(c => UIKit.renderStatusCard(c)).join('');
   }
 
   if (stepsContainer && out.report) {
     stepsContainer.innerHTML = out.report.steps.map((st, i) => `
       <tr>
-        <td style="font-weight: 600;">${i + 1}. ${st.description}</td>
-        <td class="code-cell">${st.formula || '—'}</td>
-        <td class="code-cell">${st.values || '—'}</td>
-        <td class="code-cell" style="color: var(--text-muted);">${st.ref || '—'}</td>
+        <td style="font-weight: 600;">${i + 1}. ${st.label}</td>
+        <td class="code-cell">${st.equation || '—'}</td>
+        <td class="code-cell">${st.substituted || '—'}</td>
+        <td class="code-cell" style="color: var(--text-muted);">${st.clause || '—'}</td>
       </tr>
     `).join('');
   }

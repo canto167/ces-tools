@@ -192,23 +192,16 @@ function renderResults(res) {
   }
 
   if (container && res.report) {
-    container.innerHTML = res.report.checks.map(c => UIKit.renderStatusCard({
-      title: c.title,
-      clause: c.clause,
-      actual: `${typeof c.actual === 'number' ? c.actual.toFixed(2) : c.actual} ${c.unit || ''}`,
-      allowable: `${typeof c.allowable === 'number' ? c.allowable.toFixed(2) : c.allowable} ${c.unit || ''}`,
-      ratio: c.ratio,
-      pass: c.pass
-    })).join('');
+    container.innerHTML = res.report.checks.map(c => UIKit.renderStatusCard(c)).join('');
   }
 
   if (stepsContainer && res.report) {
     stepsContainer.innerHTML = res.report.steps.map((st, i) => `
       <tr>
-        <td style="font-weight: 600;">${i + 1}. ${st.description}</td>
-        <td class="code-cell">${st.formula || '—'}</td>
-        <td class="code-cell">${st.values || '—'}</td>
-        <td class="code-cell" style="color: var(--text-muted);">${st.ref || '—'}</td>
+        <td style="font-weight: 600;">${i + 1}. ${st.label}</td>
+        <td class="code-cell">${st.equation || '—'}</td>
+        <td class="code-cell">${st.substituted || '—'}</td>
+        <td class="code-cell" style="color: var(--text-muted);">${st.clause || '—'}</td>
       </tr>
     `).join('');
   }

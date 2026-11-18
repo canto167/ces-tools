@@ -135,7 +135,7 @@ export function calculatePadFooting(input) {
 
   const z = Math.min(d * (0.5 + Math.sqrt(Math.max(0, 0.25 - K / 0.9))), 0.95 * d);
   const As = (M * 1e6) / (0.87 * fy * z);
-  const As_min = 0.0013 * B_mm * h_mm;
+  const As_min = (fy < 460 ? 0.0024 : 0.0013) * B_mm * h_mm; // BS 8110 Table 3.25
 
   // Provided reinforcement: bars across width B
   const single_bar_area = Bars.area(dia);
