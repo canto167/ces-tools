@@ -128,13 +128,13 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C6 short-column** | BS-1 | beta | 0.75 | 0.75 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | le (m) | 2.40 | 2.40 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | le/h | 8.0 | 8.0 | 0.00% | 🟢 PASS |
-| **C6 short-column** | BS-1 | Asc,req (mm²) | 1200.0 | 1200.00 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 (Eq 38, net Ac) | Asc,req (mm²) | 1157.0 | 1157.02 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | Asc,prov (mm²) | 1256.6 | 1256.64 | 0.00% | 🟢 PASS |
-| **C6 short-column** | BS-1 | capacity (kN) | 1519.8 | 1519.82 | 0.00% | 🟢 PASS |
-| **C6 short-column** | BS-1 | Nuz (kN) | 1761.6 | 1761.64 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 (Eq 38, net Ac) | capacity (kN) | 1536.2 | 1536.16 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-1 (net Ac) | Nuz (kN) | 1744.7 | 1744.67 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | link phi (mm) | 6 | 6 | 0.00% | 🟢 PASS |
 | **C6 short-column** | BS-1 | link spacing (mm) | 240 | 240 | 0.00% | 🟢 PASS |
-| **C6 short-column** | BS-1 (k=0.75) | Asc,req (mm²) | 1120.0 | 1120.00 | 0.00% | 🟢 PASS |
+| **C6 short-column** | BS-2 (Eq 39) | Asc,req (mm²) | 1710.3 | 1710.32 | 0.00% | 🟢 PASS |
 | **C7 anchorage-lap** | EC2-1 | fctm (MPa) | 2.896 | 2.896 | 0.02% | 🟢 PASS |
 | **C7 anchorage-lap** | EC2-1 | fctk,0.05 (MPa) | 2.028 | 2.028 | 0.02% | 🟢 PASS |
 | **C7 anchorage-lap** | EC2-1 | fctd (MPa) | 1.352 | 1.352 | 0.02% | 🟢 PASS |

@@ -1,6 +1,12 @@
 /**
  * C6 — Short Braced Column (Axial Load) Designer to BS 8110-1:1997
- * Cl 3.8.4.3 (Eq. 38), Cl 3.8.1.5, 3.8.1.6, Table 3.19
+ * Cl 3.8.4.3 (Eq. 38), Cl 3.8.4.4 (Eq. 39), Cl 3.8.1.3, 3.8.1.6, Table 3.19
+ *
+ * Checked against BS 8110-1:1997 incorporating Amendments 1-4:
+ *   Eq 38 (Cl 3.8.4.3, column cannot be subjected to significant moments): N = 0.4 fcu Ac + 0.75 Asc fy
+ *   Eq 39 (Cl 3.8.4.4, short braced column, approximately symmetrical beams, UDL, spans within 15%):
+ *         N = 0.35 fcu Ac + 0.67 Asc fy
+ *   Ac = NET cross-sectional area of concrete (Cl 3.8.1.1), i.e. b h - Asc.
  */
 
 import { Bars } from '../../shared/js/core/bars.js';
@@ -32,7 +38,7 @@ export function calculateShortColumn(params) {
     N = 1500,           // Design ultimate axial load (kN)
     fcu = 30,           // Concrete characteristic cube strength (N/mm2)
     fy = 500,           // Reinforcement characteristic yield strength (N/mm2)
-    k = 0.70,           // Design steel stress factor (0.70 or 0.75)
+    equation = 'eq38',  // 'eq38' (Cl 3.8.4.3) or 'eq39' (Cl 3.8.4.4)
     cover = 30,         // Nominal concrete cover to links (mm)
     barCount = 4,       // Number of longitudinal bars (even number >= 4)
     barDiam = 20        // Diameter of longitudinal bars (mm)
@@ -58,7 +64,11 @@ export function calculateShortColumn(params) {
   [['Top end condition', topEnd], ['Bottom end condition', bottomEnd]].forEach(([name, v]) => {
     if (![1, 2, 3].includes(Number(v))) errors.push(`${name} must be 1, 2 or 3 (BS 8110 Cl 3.8.1.6), got ${v}.`);
   });
-  if (k !== 0.70 && k !== 0.75) errors.push(`Steel stress factor k must be 0.70 or 0.75 (got ${k}).`);
+  const EQ = {
+    eq38: { kc: 0.40, ks: 0.75, ref: 'Cl 3.8.4.3 Eq 38', name: 'Eq 38 (no significant moments)' },
+    eq39: { kc: 0.35, ks: 0.67, ref: 'Cl 3.8.4.4 Eq 39', name: 'Eq 39 (approximately symmetrical beams)' }
+  };
+  if (!EQ[equation]) errors.push(`Equation must be eq38 or eq39 (got ${equation}).`);
   if (!Validate.isNumber(barCount) || barCount < 4 || barCount % 2 !== 0) errors.push(`Number of bars must be an even number of at least 4 (got ${barCount}).`);
   if (!Validate.isNumber(barDiam) || barDiam < 12 || barDiam > 40) errors.push(`Bar diameter must be between 12 and 40 mm (got ${barDiam}).`);
 
@@ -78,7 +88,7 @@ export function calculateShortColumn(params) {
     ref: 'Clause 3.8.1.1',
     description: 'Geometry & Material Properties',
     formula: 'b \\times h, f_{cu}, f_y, l_0',
-    values: `b = ${b} mm, h = ${h} mm, f_{cu} = ${fcu} MPa, f_y = ${fy} MPa, l_0 = ${l0} m, k = ${k}`
+    values: `b = ${b} mm, h = ${h} mm, f_{cu} = ${fcu} MPa, f_y = ${fy} MPa, l_0 = ${l0} m, ${EQ[equation].name}`
   });
 
   // Effective height and slenderness
@@ -115,38 +125,44 @@ export function calculateShortColumn(params) {
     message: isShort ? 'Short column verified (< 15)' : 'Slender column (>= 15) - additional moments required (Phase 2)'
   });
 
-  const Ac = b * h; // mm2
-  const N_concrete = (0.4 * fcu * Ac) / 1000; // kN
+  const { kc, ks, ref: eqRef } = EQ[equation];
+  if (equation === 'eq39') {
+    warnings.push('Eq 39 applies only when the beams are designed for uniformly distributed imposed loads and their spans differ by no more than 15% of the longer (BS 8110 Cl 3.8.4.4).');
+  } else {
+    warnings.push('Eq 38 applies only where, due to the nature of the structure, the column cannot be subjected to significant moments (BS 8110 Cl 3.8.4.3). For a column supporting an approximately symmetrical arrangement of beams use Eq 39.');
+  }
 
-  // Required steel area from Equation 38: N = 0.4 fcu Ac + k Asc fy
-  // Asc,req = (N - 0.4 fcu Ac) / (k fy)
+  const Ag = b * h; // gross area, mm2
+  // Provided reinforcement
+  const singleBarArea = Bars.area(barDiam);
+  const Asc_prov = barCount * singleBarArea;
+  const Ac = Ag - Asc_prov; // net concrete area (Cl 3.8.1.1)
+
+  // Required steel: N = kc fcu (Ag - Asc) + ks Asc fy  ->  Asc = (N - kc fcu Ag) / (ks fy - kc fcu)
+  const N_concrete = (kc * fcu * Ag) / 1000; // kN, concrete alone on the gross area
   const N_net = N - N_concrete; // kN
   let Asc_req = 0;
   if (N_net > 0) {
-    Asc_req = (N_net * 1000) / (k * fy);
+    Asc_req = (N_net * 1000) / (ks * fy - kc * fcu);
   }
 
-  // Minimum and Maximum steel
-  const Asc_min = 0.004 * Ac; // 0.4% Ac
-  const Asc_max = 0.06 * Ac;  // 6% Ac
+  // Minimum and maximum steel (Cl 3.12.5.3 / 3.12.6.2), on the gross section
+  const Asc_min = 0.004 * Ag; // 0.4%
+  const Asc_max = 0.06 * Ag;  // 6% (10% at laps)
 
   report.addStep({
-    ref: 'Cl 3.8.4.3 Eq 38',
+    ref: eqRef,
     description: 'Axial Resistance & Required Steel',
-    formula: 'N = 0.4 f_{cu} A_c + k A_{sc} f_y \\rightarrow A_{sc,req} = \\frac{N - 0.4 f_{cu} A_c}{k f_y}',
-    values: `N = ${N} kN, N_{conc} = ${N_concrete.toFixed(1)} kN, A_{sc,req} = ${Asc_req.toFixed(1)} mm²`
+    formula: `N = ${kc} f_{cu} A_c + ${ks} A_{sc} f_y, \\; A_c = bh - A_{sc} \\rightarrow A_{sc,req} = \\frac{N - ${kc} f_{cu} bh}{${ks} f_y - ${kc} f_{cu}}`,
+    values: `N = ${N} kN, ${kc} f_{cu} bh = ${N_concrete.toFixed(1)} kN, A_{sc,req} = ${Asc_req.toFixed(1)} mm²`
   });
 
   report.addStep({
     ref: 'Cl 3.12.5.3',
     description: 'Reinforcement Limits',
-    formula: '0.4\\% A_c \\le A_{sc} \\le 6.0\\% A_c',
+    formula: '0.4\\% A_{c,gross} \\le A_{sc} \\le 6.0\\% A_{c,gross}',
     values: `A_{sc,min} = ${Asc_min.toFixed(1)} mm², A_{sc,max} = ${Asc_max.toFixed(1)} mm²`
   });
-
-  // Provided reinforcement
-  const singleBarArea = Bars.area(barDiam);
-  const Asc_prov = barCount * singleBarArea;
 
   const steelPass = Asc_prov >= Math.max(Asc_req, Asc_min) && Asc_prov <= Asc_max;
   report.addCheck({
@@ -156,12 +172,12 @@ export function calculateShortColumn(params) {
     actual: Math.max(Asc_req, Asc_min),
     unit: 'mm²',
     pass: steelPass,
-    clause: 'BS 8110 Cl 3.8.4.3 & 3.12.5.3',
+    clause: `BS 8110 ${eqRef} & Cl 3.12.5.3`,
     message: `${barCount}H${barDiam} provided (${Asc_prov.toFixed(1)} mm²)`
   });
 
-  // Capacity with provided steel
-  const capacity = (0.4 * fcu * Ac + k * Asc_prov * fy) / 1000; // kN
+  // Capacity with provided steel (net concrete area)
+  const capacity = (kc * fcu * Ac + ks * Asc_prov * fy) / 1000; // kN
   const capPass = capacity >= N;
 
   report.addCheck({
@@ -171,15 +187,15 @@ export function calculateShortColumn(params) {
     actual: N,
     unit: 'kN',
     pass: capPass,
-    clause: 'BS 8110-1:1997 Cl 3.8.4.3',
-    message: `N = ${N} kN <= N_cap = ${capacity.toFixed(1)} kN`
+    clause: `BS 8110-1:1997 ${eqRef}`,
+    message: `N = ${N} kN ${capPass ? '<=' : '>'} N_cap = ${capacity.toFixed(1)} kN`
   });
 
-  // Short term capacity Nuz (Cl 3.8.3.7)
-  const Nuz = (0.45 * fcu * Ac + 0.87 * fy * Asc_prov) / 1000; // kN
+  // Short term capacity Nuz (Cl 3.8.3.1, net concrete area)
+  const Nuz = (0.45 * fcu * Ac + 0.87 * fy * Asc_prov) / 1000; // kN (Cl 3.8.3.1)
   report.addStep({
-    ref: 'Cl 3.8.3.7',
-    description: 'Short-Term Capacity Nuz',
+    ref: 'Cl 3.8.3.1',
+    description: 'Axial Capacity Nuz (for reference)',
     formula: 'N_{uz} = 0.45 f_{cu} A_c + 0.87 f_y A_{sc}',
     values: `N_{uz} = ${Nuz.toFixed(1)} kN`
   });
@@ -207,7 +223,9 @@ export function calculateShortColumn(params) {
   });
 
   return {
-    inputs: { b, h, l0, topEnd, bottomEnd, N, fcu, fy, k, cover, barCount, barDiam },
+    inputs: { b, h, l0, topEnd, bottomEnd, N, fcu, fy, equation, cover, barCount, barDiam },
+    equation,
+    Ag,
     beta,
     le,
     ratio_h,

@@ -20,10 +20,10 @@ const EXAMPLE = {
   N: 1500,
   fcu: 30,
   fy: 500,
-  k: 0.70,
+  equation: 'eq39', // matches the worked example in the short column post (symmetrical beams)
   cover: 30,
   barCount: 4,
-  barDiam: 20
+  barDiam: 25
 };
 
 let currentInputs = { ...EXAMPLE };
@@ -61,7 +61,15 @@ function setupEventListeners() {
     UIKit.bindStepper(el, step, min, Infinity, () => triggerRecalc());
   });
 
-  ['topEnd', 'bottomEnd', 'k'].forEach(id => {
+  const eqEl = document.getElementById('equation');
+  if (eqEl) {
+    eqEl.addEventListener('change', () => {
+      currentInputs.equation = eqEl.value;
+      triggerRecalc();
+    });
+  }
+
+  ['topEnd', 'bottomEnd'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
     el.addEventListener('change', () => {
@@ -143,7 +151,7 @@ function populateUIFromState() {
   setValue('N', currentInputs.N);
   setValue('fcu', currentInputs.fcu);
   setValue('fy', currentInputs.fy);
-  setValue('k', currentInputs.k);
+  setValue('equation', currentInputs.equation || 'eq38');
   setValue('cover', currentInputs.cover);
 
   setupSegmentedPicker('barCount_group', [4, 6, 8], currentInputs.barCount || 4, (cnt) => {

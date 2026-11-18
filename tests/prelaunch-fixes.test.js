@@ -150,9 +150,9 @@ describe('C7 anchorage and lap fixes', () => {
 });
 
 describe('C6 column guards', () => {
-  test('S12: end condition 4 and k = 0.8 are rejected; valid input passes', () => {
+  test('S12: end condition 4 and an unknown equation are rejected; valid input passes', () => {
     assert.strictEqual(calculateShortColumn({ ...column, topEnd: 4 }).ok, false);
-    assert.strictEqual(calculateShortColumn({ ...column, k: 0.8 }).ok, false);
+    assert.strictEqual(calculateShortColumn({ ...column, equation: 'k070' }).ok, false);
     assert.strictEqual(calculateShortColumn({ ...column, barCount: 5 }).ok, false);
     assert.strictEqual(calculateShortColumn(column).ok, true);
   });

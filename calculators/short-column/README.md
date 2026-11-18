@@ -38,23 +38,20 @@ A column is classified as **short** (Cl 3.8.1.5) when both:
 $$\frac{l_{ex}}{h} < 15 \quad \text{and} \quad \frac{l_{ey}}{b} < 15$$
 If either ratio $\ge 15$, the column is slender and is blocked by this calculator.
 
-### 2.2 Ultimate Axial Compression Capacity (BS 8110-1:1997 Cl 3.8.4.3)
-For a short braced column supporting approximately symmetrical arrangements of beams with spans not differing by more than 15%, the design axial resistance is given by Equation 38:
-$$N = 0.4 f_{cu} A_c + k A_{sc} f_y$$
-where:
-- $f_{cu}$ = characteristic 28-day cube strength of concrete ($\le 50\text{ N/mm}^2$).
-- $f_y$ = characteristic yield strength of reinforcement.
-- $A_c = b \cdot h$ = gross cross-sectional area of concrete.
-- $A_{sc}$ = area of longitudinal reinforcement.
-- $k$ = design steel stress factor:
-  - Default: $k = 0.70$ (reflecting safety factor $\gamma_m = 1.15$, where $0.87 \times 0.8 \approx 0.70$).
-  - Original BS 8110: $k = 0.75$ (for older $\gamma_m = 1.05$). Editable in settings.
+### 2.2 Ultimate Axial Compression Capacity (BS 8110-1:1997 Cl 3.8.4.3 and 3.8.4.4)
+Checked against BS 8110-1:1997 incorporating Amendments 1–4 (page 71):
 
-The required area of steel is:
-$$A_{sc,req} = \frac{N - 0.4 f_{cu} A_c}{k f_y}$$
-If $N \le 0.4 f_{cu} A_c$, nominal minimum steel governs.
+- **Eq 38 (Cl 3.8.4.3)**, where the column cannot be subjected to significant moments:
+  $$N = 0.4 f_{cu} A_c + 0.75 A_{sc} f_y$$
+- **Eq 39 (Cl 3.8.4.4)**, short braced column supporting an approximately symmetrical arrangement of beams (beams designed for UDL imposed loads, spans within 15% of the longer):
+  $$N = 0.35 f_{cu} A_c + 0.67 A_{sc} f_y$$
 
-### 2.3 Short-Term Axial Capacity $N_{uz}$ (Cl 3.8.3.7)
+Both include the allowance for $\gamma_m$. $A_c$ is the **net** concrete area (Cl 3.8.1.1): $A_c = bh - A_{sc}$. The tool defaults to Eq 38; choose Eq 39 for the symmetrical-beams case.
+
+Required steel, with $k_c, k_s$ = (0.4, 0.75) or (0.35, 0.67):
+$$A_{sc,req} = \frac{N - k_c f_{cu} bh}{k_s f_y - k_c f_{cu}}$$
+
+### 2.3 Axial Capacity $N_{uz}$ (Cl 3.8.3.1)
 $$N_{uz} = 0.45 f_{cu} A_c + 0.87 f_y A_{sc}$$
 
 ### 2.4 Reinforcement Limits (Cl 3.12.5.3, 3.12.7.1)
@@ -73,14 +70,14 @@ $$e_{min} = \min(0.05 h, 20\text{ mm})$$
 ### Test Case BS-1
 - Inputs: $b = 300\text{ mm}, h = 300\text{ mm}, l_0 = 3.2\text{ m}$, Top End 1, Bottom End 1.
 - Design load: $N = 1500\text{ kN}$.
-- Materials: $f_{cu} = 30\text{ N/mm}^2, f_y = 500\text{ N/mm}^2, k = 0.70$.
+- Materials: $f_{cu} = 30\text{ N/mm}^2, f_y = 500\text{ N/mm}^2$, Eq 38.
 - Selected bars: 4H20 ($A_{sc,prov} = 1256.6\text{ mm}^2$).
 - Results:
   - $\beta = 0.75$
   - $l_e = 2.40\text{ m}$
   - $l_e/h = 8.0 < 15$ (Short column — PASS)
-  - $A_{sc,req} = 1200.0\text{ mm}^2$
-  - Capacity $N_{cap} = 1519.8\text{ kN} \ge 1500\text{ kN}$ (PASS)
-  - $N_{uz} = 1761.6\text{ kN}$
+  - $A_{sc,req} = 420000 / 363 = 1157.0\text{ mm}^2$; $A_c = 90000 - 1256.6 = 88743.4\text{ mm}^2$
+  - Capacity $N_{cap} = 1064.9 + 471.2 = 1536.2\text{ kN} \ge 1500\text{ kN}$ (PASS)
+  - $N_{uz} = 1744.7\text{ kN}$
   - Minimum link diameter $\phi 6\text{ mm}$, spacing $240\text{ mm}$
-  - (With $k = 0.75$: $A_{sc,req} = 1120.0\text{ mm}^2$).
+  - With Eq 39: $A_{sc,req} = 1710.3\text{ mm}^2$, 4H20 capacity 1352.8 kN (FAIL), 6H20 capacity 1556.7 kN (PASS).

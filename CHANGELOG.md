@@ -21,8 +21,9 @@
 - Load Example values match the blog posts: C1 links H8 at 300 (EC2 top bars 2H12); C8 E = 210 GPa, I = 95.1 x 10^6 mm4.
 ### Tests
 - tests/prelaunch-fixes.test.js: 34 new tests with hand-calculated values; 107/107 pass.
-### Open (needs engineer check against BS 8110 text)
-- S12: C6 uses N = 0.4 fcu Ac + k Asc fy with gross Ac and k = 0.70/0.75. Confirm the equation number, coefficients (Eq 38 vs Eq 39, 1997 vs Amd 2005) and net vs gross Ac.
+### Fixed after checking BS 8110-1:1997 incorporating Amendments 1-4 (STRUCT-Agent codes/raw, page 71)
+- S12, C6: Eq 38 (Cl 3.8.4.3, no significant moments) = 0.4 fcu Ac + 0.75 Asc fy; Eq 39 (Cl 3.8.4.4, approximately symmetrical beams) = 0.35 fcu Ac + 0.67 Asc fy. Ac is the net area (Cl 3.8.1.1). The tool now offers both equations (replacing the k = 0.70/0.75 option) and uses net Ac in the capacity and Nuz (0.45 fcu Ac + 0.87 fy Asc, Cl 3.8.3.1).
+- C6 Load Example now matches the blog post: Eq 39, 4H25 (capacity 1,582 kN).
 
 ## [1.0.0-phase0] - 2026-11-18
 ### Added
