@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Punching Shear Designer (Eurocode 2) — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+</head>
+<body>
+  <!-- Print Header -->
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Project:</strong> Slab Punching Shear Verification</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-PSH-01</td>
+      </tr>
+      <tr>
+        <td><strong>Member:</strong> Column-Slab Junction</td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+      <tr>
+        <td colspan="2"><strong>Design Code:</strong> Eurocode 2 (EN 1992-1-1 Cl 6.4)</td>
+        <td><strong>Engineer:</strong> Qualified Structural PE</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Punching Shear Designer (Eurocode 2)</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Perimeters u0, u1, u_out & Shear Stud/Link Verification</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div id="errorAlert" class="card" style="display: none;"></div>
+
+    <div class="ces-calculator-grid">
+      <!-- Left Column: Inputs -->
+      <div class="ces-inputs-panel">
+        <div class="card">
+          <div class="card-title">Column Geometry & Framing Position</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="c1">Width, c1 <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="c1" class="form-input" value="400" min="150" max="2000" step="25">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="c2">Depth, c2 <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="c2" class="form-input" value="400" min="150" max="2000" step="25">
+              </div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="col_type">Location</label>
+              <select id="col_type" class="form-input" style="padding: 7px 10px;">
+                <option value="internal" selected>Internal Column (β = 1.15)</option>
+                <option value="edge">Edge Column (β = 1.40)</option>
+                <option value="corner">Corner Column (β = 1.50)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="beta">β Factor</label>
+              <div class="input-with-stepper">
+                <input type="number" id="beta" class="form-input" value="1.15" min="1.0" max="2.5" step="0.05">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Slab Depth & Design Shear Action</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="d">Mean Eff. Depth, d <span class="unit">(mm)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="d" class="form-input" value="210" min="100" max="1000" step="10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="VEd">Design Shear, VEd <span class="unit">(kN)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="VEd" class="form-input" value="750" min="10" max="10000" step="25">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rho_l">Tension Steel Ratio, ρl = √(ρly * ρlz)</label>
+            <div class="input-with-stepper">
+              <input type="number" id="rho_l" class="form-input" value="0.0075" min="0.001" max="0.02" step="0.0005">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Material Properties & National Annex</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label" for="fck">fck (Cylinder) <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fck" class="form-input" value="30" min="20" max="50" step="5">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="fywk">Link fywk <span class="unit">(N/mm²)</span></label>
+              <div class="input-with-stepper">
+                <input type="number" id="fywk" class="form-input" value="500" min="250" max="600" step="50">
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">vRd,max Factor (National Annex)</label>
+            <div style="display: flex; gap: 16px; margin-top: 4px;">
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <input type="radio" name="na_factor" value="0.4" checked> 0.40 (EN Recommended)
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; cursor: pointer;">
+                <input type="radio" name="na_factor" value="0.5"> 0.50 (UK National Annex)
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Shear Reinforcement Detailing</div>
+          <div class="form-group">
+            <label class="form-label">Link Bar Diameter</label>
+            <div id="link_dia_group"></div>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label" for="sr">Radial Spacing of Perimeters, sr <span class="unit">(mm)</span></label>
+            <div class="input-with-stepper">
+              <input type="number" id="sr" class="form-input" value="150" min="50" max="400" step="25">
+            </div>
+            <span style="font-size: 11px; color: var(--text-muted);">Must not exceed 0.75d</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Results -->
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Control Perimeters Plan</div>
+          <div class="svg-canvas-container">
+            <svg id="punchingSVG" width="380" height="340"></svg>
+          </div>
+          <div id="summaryGrid" class="summary-grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="tabs-nav no-print">
+            <button type="button" class="tab-btn active" data-target="tabSummary">Design Checks</button>
+            <button type="button" class="tab-btn" data-target="tabSteps">Step-by-Step Working</button>
+          </div>
+
+          <div id="tabSummary" class="tab-pane active">
+            <div id="checksContainer"></div>
+          </div>
+
+          <div id="tabSteps" class="tab-pane">
+            <div style="overflow-x: auto;">
+              <table class="calc-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Equation</th>
+                    <th>Substitution</th>
+                    <th>Result</th>
+                    <th>Clause</th>
+                  </tr>
+                </thead>
+                <tbody id="stepsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Print Footer -->
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> (structure-structural-software.blogspot.com) — Punching Shear Designer v1.0.
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for educational and preliminary verification. Results must be certified by a registered Professional Engineer.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initPunchingShearUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initPunchingShearUI();
+    });
+  </script>
+</body>
+</html>

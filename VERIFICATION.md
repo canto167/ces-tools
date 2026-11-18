@@ -105,3 +105,19 @@ All acceptance tests must match expected values within stated tolerances (defaul
 | **C3 two-way-slab** | BS-1 | actual span/d | 27.59 | 27.59 | 0.00% | 🟢 PASS |
 | **C3 two-way-slab** | BS-1 | v (N/mm²) | 0.167 | 0.167 | 0.00% | 🟢 PASS |
 | **C3 two-way-slab** | BS-1 | vc (N/mm²) | 0.561 | 0.560 | 0.18% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | u0 (mm) | 1600.0 | 1600.00 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | vEd,0 (N/mm²) | 2.567 | 2.567 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | vRd,max (0.4) (N/mm²) | 4.224 | 4.224 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | vRd,max (0.5 UK) (N/mm²) | 5.280 | 5.280 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | u1 at 2d (mm) | 4238.9 | 4238.94 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | vEd,1 (N/mm²) | 0.969 | 0.969 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | k | 1.976 | 1.976 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | vRd,c (N/mm²) | 0.669 | 0.669 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | v_min (N/mm²) | 0.532 | 0.532 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | fywd,ef (N/mm²) | 302.5 | 302.50 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | Asw/sr (mm²/mm) | 4.362 | 4.362 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | Asw per perim (mm²) | 654.2 | 654.23 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | Link legs per perim | 9 | 9 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | uout (mm) | 6135.7 | 6135.66 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | r_out (mm) | 721.9 | 721.88 | 0.00% | 🟢 PASS |
+| **C4 punching-shear** | EC2-1 | last perim dist (mm) | 406.9 | 406.88 | 0.00% | 🟢 PASS |
