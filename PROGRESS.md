@@ -33,14 +33,14 @@
 ---
 
 ## Phase 2 — Written Specifications Only (Docs)
-- [ ] 1. Crack width check (EC2 Cl 7.3.4 & BS 8110-2 Cl 3.8) ⚪
-- [ ] 2. Restrained two-way slabs (BS 8110 Table 3.14 & EC2) ⚪
-- [ ] 3. Column with moments and slenderness ⚪
-- [ ] 4. Flanged (T and L) beams ⚪
-- [ ] 5. Pad footing to EC2 with moments ⚪
-- [ ] 6. BS 8110 punching shear ⚪
-- [ ] 7. Concrete cover calculator ⚪
-- [ ] 8. Precast lifting (strands/rebars & CG) ⚪
-- [ ] 9. Steel member checks (EC3) ⚪
-- [ ] 10. BS 8666 bar shape codes ⚪
-- [ ] 11. Deflection by calculation (EC2 Cl 7.4.3) ⚪
+- [x] 1. Crack width check (`docs/specs-phase2/crack-width.md`) 🟢
+- [x] 2. Restrained two-way slabs (`docs/specs-phase2/restrained-two-way-slab.md`) 🟢
+- [x] 3. Column with moments and slenderness (`docs/specs-phase2/column-moments-slender.md`) 🟢
+- [x] 4. Flanged (T and L) beams (`docs/specs-phase2/flanged-beam.md`) 🟢
+- [x] 5. Pad footing to EC2 with moments (`docs/specs-phase2/ec2-pad-footing.md`) 🟢
+- [x] 6. BS 8110 punching shear (`docs/specs-phase2/bs8110-punching-shear.md`) 🟢
+- [x] 7. Concrete cover calculator (`docs/specs-phase2/concrete-cover.md`) 🟢
+- [x] 8. Precast lifting (strands/rebars & CG) (`docs/specs-phase2/precast-lifting.md`) 🟢
+- [x] 9. Steel member checks (EC3) (`docs/specs-phase2/steel-member-ec3.md`) 🟢
+- [x] 10. BS 8666 bar shape codes (`docs/specs-phase2/bar-shape-codes.md`) 🟢
+- [x] 11. Deflection by calculation (`docs/specs-phase2/deflection-calculation.md`) 🟢
