@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section Properties Calculator: Moment of Inertia, Section Modulus — Civil Engineer Society</title>
+  <link rel="stylesheet" href="../../shared/css/base.css">
+  <link rel="stylesheet" href="../../shared/css/print.css">
+  <style>
+    .sp-dims { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sp-rect-row { display: grid; grid-template-columns: repeat(4, 1fr) 32px; gap: 6px; align-items: end; margin-bottom: 6px; }
+    .sp-rect-row label { font-size: 11px; color: var(--text-muted); }
+    .sp-rect-row .form-input { padding: 6px 8px; }
+    .sp-del { border: 1px solid #ef4444; background: transparent; color: #ef4444; border-radius: 4px; height: 34px; cursor: pointer; }
+    .sp-warn { font-size: 13px; color: #92400e; background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 10px; margin-top: 10px; }
+    .sp-err { font-size: 13px; color: #b91c1c; background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 10px; margin-top: 10px; }
+    .sp-results td:first-child { font-weight: 600; }
+    .sp-results td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  </style>
+  <meta name="googlebot" content="noindex, indexifembedded">
+  <meta name="robots" content="noindex, follow">
+</head>
+<body>
+  <div class="print-header">
+    <table class="print-header-table">
+      <tr>
+        <td rowspan="2" style="width: 25%; font-weight: 800; font-size: 14pt; text-align: center;">CES TOOLS</td>
+        <td style="width: 45%;"><strong>Calculation:</strong> Section Properties</td>
+        <td style="width: 30%;"><strong>Doc Ref:</strong> CES-CALC-SEC-01</td>
+      </tr>
+      <tr>
+        <td><strong>Section:</strong> <span id="printShape"></span></td>
+        <td><strong>Date:</strong> <span id="printDate"></span></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ces-container">
+    <header class="ces-header no-print">
+      <div class="ces-logo-group">
+        <a href="../../index.html" class="ces-badge-logo" style="text-decoration: none;">CES</a>
+        <div>
+          <h1 style="font-size: 18px;">Section Properties Calculator</h1>
+          <span style="font-size: 12px; color: var(--text-muted);">Moment of inertia, section modulus (elastic and plastic), centroid and radius of gyration</span>
+        </div>
+      </div>
+      <div class="ces-header-actions">
+        <a id="btnFullScreen" class="btn" href="./" target="_blank" rel="noopener" style="display:none;">Open full screen</a>
+        <button type="button" id="btnLoadExample" class="btn">Load Example</button>
+        <button type="button" id="btnCopyLink" class="btn">Copy Link</button>
+        <button type="button" id="btnPrintPDF" class="btn btn-primary">Print / PDF</button>
+      </div>
+    </header>
+
+    <div class="ces-calculator-grid">
+      <div>
+        <div class="card">
+          <div class="card-title">Units and Shape</div>
+          <div class="form-group">
+            <label class="form-label">Units</label>
+            <div id="unitsGroup"></div>
+          </div>
+          <div class="form-group" style="margin-top: 10px;">
+            <label class="form-label" for="shape">Cross-section</label>
+            <select id="shape" class="form-select">
+              <option value="rectangle">Rectangle</option>
+              <option value="i-section">I-beam (symmetric: UB, W-shape, IPE)</option>
+              <option value="t-section">T-section</option>
+              <option value="channel">Channel (C / PFC)</option>
+              <option value="box">Box / hollow rectangle (RHS, SHS)</option>
+              <option value="circle">Solid circle</option>
+              <option value="pipe">Pipe / hollow circle (CHS)</option>
+              <option value="built-up">Built-up (up to 12 rectangles)</option>
+            </select>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Dimensions <span class="unit" id="dimUnit">(mm)</span></div>
+          <div id="dimsBox"></div>
+          <div id="msgBox"></div>
+        </div>
+      </div>
+
+      <div class="ces-results-panel">
+        <div class="card">
+          <div class="card-title">Section to Scale</div>
+          <div class="svg-canvas-container" id="svgBox" style="min-height: 260px;"></div>
+          <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">Blue dashed: centroidal axes. Orange dotted: plastic neutral axis (x-x).</div>
+        </div>
+        <div class="card">
+          <div class="card-title">Results</div>
+          <table class="calc-table sp-results">
+            <thead><tr><th>Property</th><th>x-x (strong axis)</th><th>y-y (weak axis)</th></tr></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="card-title">Step-by-Step</div>
+          <table class="calc-table">
+            <thead><tr><th>Step</th><th>Formula</th><th>Value</th></tr></thead>
+            <tbody id="stepsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="print-footer">
+      Generated by <strong>Civil Engineer Society</strong> — Section Properties Calculator v1.0.
+    </div>
+
+    <div class="no-print" style="margin-top: 16px;">
+        <!-- Related Guides -->
+        <div class="card no-print ces-related" style="background: var(--color-blue-light); border-color: var(--color-blue);">
+          <div class="card-title" style="color: var(--color-blue); font-size: 14px;">Related Guides &amp; Worked Examples</div>
+          <ul style="font-size: 13px; padding-left: 20px; line-height: 1.6;">
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/area-moment-of-inertia.html" target="_top" style="color: var(--color-blue); font-weight: 600;">Area Moment of Inertia</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/section-modulus.html" target="_top" style="color: var(--color-blue); font-weight: 600;">Section Modulus</a></li>
+            <li><a href="https://structure-structural-software.blogspot.com/2026/11/beam-deflection-formulas.html" target="_top" style="color: var(--color-blue); font-weight: 600;">Beam Deflection Formulas</a></li>
+          </ul>
+        </div>
+    </div>
+
+    <div class="ces-disclaimer no-print">
+      <strong>Engineering Disclaimer:</strong> Free tool for learning and preliminary checks. Properties are for the idealised shape entered (no root radii or fillets); use the manufacturer's or code tables for rolled sections in final design.
+    </div>
+  </div>
+
+  <script type="module">
+    import { initSectionPropertiesUI } from './ui.js';
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('printDate').textContent = new Date().toLocaleDateString('en-GB');
+      initSectionPropertiesUI();
+    });
+  </script>
+  <script>
+    if (window.self !== window.top) { var fs = document.getElementById('btnFullScreen'); if (fs) fs.style.display = ''; }
+  </script>
+</body>
+</html>
